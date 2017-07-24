@@ -63,11 +63,8 @@ class Automata:
     def generate_automata(self, automata_text):
 
         state_transition_division = automata_text.split("*")
-
-        for std in state_transition_division:
-            print(std)
-
         states_division = state_transition_division[0].split("|")
+        transition_division = state_transition_division[1].split("|")
 
         for sd in states_division:
             states_components = sd.split(",")
@@ -79,8 +76,6 @@ class Automata:
                 self.create_state(states_components[0], False, True)
             if states_components[1] == "IF":
                 self.create_state(states_components[0], True, True)
-
-        transition_division = state_transition_division[1].split("|")
 
         for td in transition_division:
             transition_components = td.split(",")
