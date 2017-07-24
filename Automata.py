@@ -33,16 +33,20 @@ class Automata:
         origin_state = self.get_state(origin)
         destination_state = self.get_state(destination)
 
-        if self.transition_exists(origin_state, destination_state, transition_char):
+        if self.transition_exists(origin, destination, transition_char):
             print("Transition already exists.")
         else:
             new_transition = Transition(origin_state, destination_state, transition_char)
             self.transitionList.append(new_transition)
 
     def transition_exists(self, origin, destination, transition_char):
+
+        if not self.state_exists(origin) and self.state_exists(destination):
+            return False
+
         for transition in self.transitionList:
-            if transition.originState.stateName == origin.stateName:
-                if transition.destinationState.stateName == destination.stateName:
+            if transition.originState.stateName == origin:
+                if transition.destinationState.stateName == destination:
                     if transition.transitionChar == transition_char:
                         return True
         return False
@@ -57,8 +61,9 @@ class Automata:
                   + ", " + transition.transitionChar)
 
     def get_inital_node(self):
-        # print(self.stateList[0].stateName)
-        return self.stateList[0]
+        for state in self.stateList:
+            if state.isInitial:
+                return state
 
     def generate_automata(self, automata_text):
 
