@@ -18,7 +18,8 @@ class EvaluateAutomata:
             temp_list = []
             for cn in current_nodes:
                 states = AutomataActions().get_next_states(cn, c, automata.transitionList)
-                temp_list.append(states)
+                for s in states:
+                    temp_list.append(s)
 
             current_nodes = []
 

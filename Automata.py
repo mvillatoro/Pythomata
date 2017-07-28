@@ -24,10 +24,11 @@ class Automata:
 
     def create_state(self, state_name, is_initial, is_accepted):
         if self.state_exists(state_name):
-            print("State already exists")
+            return True
         else:
             new_state = State(state_name, is_initial, is_accepted)
             self.stateList.append(new_state)
+            return False
 
     def create_transition(self, origin, destination, transition_char):
         origin_state = self.get_state(origin)
@@ -45,10 +46,9 @@ class Automata:
             return False
 
         for transition in self.transitionList:
-            if transition.originState.stateName == origin:
-                if transition.destinationState.stateName == destination:
-                    if transition.transitionChar == transition_char:
-                        return True
+            if transition.originState.stateName == origin and transition.destinationState.stateName == destination and\
+                            transition.transitionChar == transition_char:
+                return True
         return False
 
     def list_states(self):
