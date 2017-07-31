@@ -4,10 +4,9 @@ from Transition import Transition
 
 class Automata:
     def __init__(self, automata_type):
-        Automata.automataType = automata_type
         self.transitionList = []
         self.stateList = []
-        self.automataType = ""
+        self.automataType = automata_type
 
     def get_state(self, state_name):
         for state in self.stateList:
@@ -37,8 +36,24 @@ class Automata:
         if self.transition_exists(origin, destination, transition_char):
             print("Transition already exists.")
         else:
-            new_transition = Transition(origin_state, destination_state, transition_char)
-            self.transitionList.append(new_transition)
+            if self.automataType == "nfa":
+                new_transition = Transition(origin_state, destination_state, transition_char)
+                self.transitionList.append(new_transition)
+                return True
+            elif self.automataType == "dfa":
+                if self.check_dfa_transition(origin_state, transition_char):
+                    return False
+                else:
+                    new_transition = Transition(origin_state, destination_state, transition_char)
+                    self.transitionList.append(new_transition)
+                    return True
+        return False
+
+    def check_dfa_transition(self, state, transition_char):
+        for transition in self.transitionList:
+            if transition.originState.stateName == state.stateName and transition.transitionChar == transition_char:
+                return True
+        return False
 
     def transition_exists(self, origin, destination, transition_char):
 
@@ -60,7 +75,7 @@ class Automata:
             print(transition.originState.stateName + ", " + transition.destinationState.stateName
                   + ", " + transition.transitionChar)
 
-    def get_inital_node(self):
+    def get_initial_node(self):
         for state in self.stateList:
             if state.isInitial:
                 return state
@@ -85,3 +100,43 @@ class Automata:
         for td in transition_division:
             transition_components = td.split(",")
             self.create_transition(transition_components[0],transition_components[2],transition_components[1])
+
+    def delete_state(self, state_name):
+        i = 0
+        for state in self.stateList:
+            if state.stateName == state_name:
+                del self.stateList[i]
+                self.delete_transitions_with_state_cascade(state_name)
+            i += 1
+
+    def delete_transitions_with_state_cascade(self, state_name):
+        i = 0
+        for transition in self.transitionList:
+            if transition.originState.stateName == state_name or transition.destinationState.stateName == state_name:
+                del self.transitionList[i]
+                self.delete_transitions_cascade(state_name)
+            i += 1
+
+    def delete_transition(self, origin_name, transition_char, destiny_name):
+        i = 0
+        for transition in self.transitionList:
+            if transition.originState.stateName == origin_name and transition.destinationState.stateName == destiny_name and\
+                            transition.transitionChar == transition_char:
+                del self.transitionList[i]
+
+            i += 1
+
+    def get_alphabet(self):
+        alphabet = []
+        for transition in self.transitionList:
+            alphabet.append(transition.transitionChar)
+
+        return alphabet
+
+    def get_transition_data(self, state, transition_char):
+        transitions = []
+        for transition in self.transitionList:
+            if transition.originState.stateName == state.stateName and transition.transitionChar == transition_char:
+                transitions.append(transition)
+
+        return transitions
