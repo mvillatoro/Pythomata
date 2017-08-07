@@ -1,11 +1,10 @@
 from tkinter import messagebox
-
 from Automata import Automata
 from EvaluateAutomata import EvaluateAutomata
 from tkinter import *
 from tkinter.ttk import *
+from tkinter.filedialog import askopenfilename
 from tkinter.simpledialog import askstring
-from tkinter.messagebox import showinfo
 
 
 def draw_circle(canv, x, y, state_name):
@@ -26,16 +25,26 @@ def draw_circle(canv, x, y, state_name):
             GUI.draw_circle_aux(canv, x, y, '#99ff99', split_text[0])
         else:
             messagebox.showinfo("Alert", "El estado ya existe")
+    if split_text[1] == "IF":
+        if not GUI.au.create_state(split_text[0], True, True):
+            GUI.draw_circle_aux(canv, x, y, '#99ff99', split_text[0])
+        else:
+            messagebox.showinfo("Alert", "El estado ya existe")
 
 
 def get_all_state_components(item_id):
+
+    i = 0
+
     for sc in GUI.state_nodes:
         if sc.type == "node":
             if item_id == sc.label_id or item_id == sc.node_id:
-                return sc.type, sc.node_name, sc.label_id, sc.node_id, 0, 0
+                return sc.type, sc.node_name, sc.label_id, sc.node_id, 0, 0, i
+            i += 1
         else:
             if item_id == sc.char_id or item_id == sc.edge_id:
-                return sc.type, sc.node_origin_name, sc.transition_char, sc.node_destiny_name, sc.char_id, sc.edge_id
+                return sc.type, sc.node_origin_name, sc.transition_char, sc.node_destiny_name, sc.char_id, sc.edge_id, i
+            i += 1
 
 class node_data():
     def __init__(self, x_pos, y_pos, node_name, fill_color, label_id, node_id):
@@ -46,7 +55,6 @@ class node_data():
         self.label_id = label_id
         self.node_id = node_id
         self.type = "node"
-
 
 class edge_data():
     def __init__(self, node_origin_id, node_destiny_id, x_pos_a, y_pos_a, x_pos_b, y_pos_b, transition_char,
@@ -129,7 +137,7 @@ class GUI(Frame):
 
         nfa_to_dfa_button = Button(self, text="NFA -> DFA", command=self.convert_nfa_to_dfa)
         nfa_to_dfa_button.place(x=200, y=549)
-#         nfa_to_dfa_button.place_forget()
+  #      nfa_to_dfa_button.place_forget()
 
         GUI.automataType = IntVar()
 
@@ -137,6 +145,27 @@ class GUI(Frame):
         radio_1.place(x=800, y=20)
         radio_2 = Radiobutton(self.master, text="NFA", variable=self.automataType, value=2, command=self.choose_automata)
         radio_2.place(x=800, y=40)
+
+        save_automata_button = Button(self, text="Save automata", command=self.save_automata)
+        save_automata_button.place(x=800, y=490)
+
+        load_automata_button = Button(self, text="Load automata", command=self.load_automtata)
+        load_automata_button.place(x=800, y=520)
+
+    def save_automata(self):
+        file_name = askstring('File name', "")
+        if file_name:
+            if self.au.save_automata(file_name):
+                messagebox.showinfo("Result", "El automata se salvo")
+
+    def load_automtata(self):
+
+        f_name = askopenfilename()
+        print(f_name)
+        if f_name:
+            if self.au.load_automata(f_name):
+                messagebox.showinfo("Result", "El automata se cargo")
+
 
     def choose_automata(self):
         selection = str(self.automataType.get())
@@ -147,6 +176,7 @@ class GUI(Frame):
             GUI.au = Automata("nfa")
 
     def convert_nfa_to_dfa(self):
+        self.au.save_automata()
         return EvaluateAutomata().nfa_to_dfa(GUI.au)
 
     def change_edit_state(self):
@@ -208,14 +238,15 @@ class GUI(Frame):
 
     def get_state_data(self, state_name):
         for sn in self.state_nodes:
-            if sn.node_name == state_name:
-                return sn.x_pos, sn.y_pos, sn.node_id
+            if sn.type == "node":
+                if sn.node_name == state_name:
+                    return sn.x_pos, sn.y_pos, sn.node_id
 
     def test_string_fun(self):
         test_string = askstring('Insert test string', "")
 
         if test_string:
-            result = EvaluateAutomata().evaluate_nfa(test_string, self.au)
+            result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 
             if result:
                 messagebox.showinfo("Result", "La cadena fue aceptada")
@@ -237,19 +268,25 @@ class GUI(Frame):
     def delete_drawn_object(event):
         item = GUI.drawing_area.find_closest(event.x, event.y)
         if len(item) is not 0:
-            object_type, state_name, element1, element2, c_id, e_id = get_all_state_components(item[0])
+            object_type, state_name, element1, element2, c_id, e_id, i = get_all_state_components(item[0])
 
             if object_type == "node":
                 GUI.au.delete_state(state_name)
                 GUI.drawing_area.delete(element1)
                 GUI.drawing_area.delete(element2)
+                del GUI.state_nodes[i]
+
+                for sn in GUI.state_nodes:
+                    if sn.type == "edge":
+                        GUI.drawing_area.delete(sn.char_id)
+                        GUI.drawing_area.delete(sn.edge_id)
+
             else:
                 print(str(state_name) + " ," + str(element1) + ", " + str(element2))
                 GUI.au.delete_transition(state_name, element1, element2)
                 GUI.drawing_area.delete(c_id)
                 GUI.drawing_area.delete(e_id)
-                print("************")
-                GUI.au.list_transitions()
+                del GUI.state_nodes[i]
 
     def center_window(self):
         w = 1000

@@ -18,8 +18,7 @@ class Automata:
         for state in self.stateList:
             if state.stateName == state_name:
                 return True
-            else:
-                return False
+        return False
 
     def create_state(self, state_name, is_initial, is_accepted):
         if self.state_exists(state_name):
@@ -36,7 +35,7 @@ class Automata:
         if self.transition_exists(origin, destination, transition_char):
             print("Transition already exists.")
         else:
-            if self.automataType == "nfa":
+            if self.automataType == "nfa" or self.automataType == "nfae":
                 new_transition = Transition(origin_state, destination_state, transition_char)
                 self.transitionList.append(new_transition)
                 return True
@@ -88,6 +87,9 @@ class Automata:
 
         for sd in states_division:
             states_components = sd.split(",")
+
+            print(states_components[0])
+            print(states_components[1])
             if states_components[1] == "N":
                 self.create_state(states_components[0], False, False)
             if states_components[1] == "I":
@@ -114,7 +116,7 @@ class Automata:
         for transition in self.transitionList:
             if transition.originState.stateName == state_name or transition.destinationState.stateName == state_name:
                 del self.transitionList[i]
-                self.delete_transitions_cascade(state_name)
+                self.delete_transitions_with_state_cascade(state_name)
             i += 1
 
     def delete_transition(self, origin_name, transition_char, destiny_name):
@@ -140,3 +142,80 @@ class Automata:
                 transitions.append(transition)
 
         return transitions
+
+    def save_automata(self, save_name):
+        state_string = ""
+
+        if len(self.stateList) == 0:
+            return False
+
+        for state in self.stateList:
+            string_builder = ""
+            string_builder = state.stateName + ","
+            if state.isInitial and state.accepted:
+                string_builder = string_builder + "IF"
+            elif state.isInitial and not state.accepted:
+                string_builder = string_builder + "I"
+            if not state.isInitial and not state.accepted:
+                string_builder = string_builder + "N"
+            if not state.isInitial and state.accepted:
+                string_builder = string_builder + "F"
+            string_builder = string_builder + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+        state_string = state_string + "*"
+
+        for transition in self.transitionList:
+            string_builder = transition.originState.stateName + "," + transition.transitionChar + "," + \
+                             transition.destinationState.stateName + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+
+        f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".ptm", "w+")
+        f.write(state_string)
+
+        return True
+
+    def load_automata(self, save_name):
+
+        self.stateList = []
+
+        self.transitionList = []
+
+        text_automtata = ""
+        f = open(save_name, "r")
+
+        if f.mode == 'r':
+            text_automtata = f.read()
+
+        if not text_automtata:
+            return False
+
+        self.generate_automata(text_automtata)
+        return True
+
+    def state_closure(self, state):
+        return_states = [state]
+
+        for transition in self.transitionList:
+            if transition.originState.stateName == state.stateName and transition.transitionChar == "e":
+                if not self.check_if_exists_in_list(transition.destinationState, return_states):
+                    return_states.append(transition.destinationState)
+
+        for rt in return_states[1:]:
+            new_rt = self.state_closure(rt)
+            for nrt in new_rt:
+                if not self.check_if_exists_in_list(nrt, return_states):
+                    return_states.append(nrt)
+
+        return return_states
+
+    def check_if_exists_in_list(self, element, elem_list):
+        for lst in elem_list:
+            if element.stateName == lst.stateName:
+                return True
+        return False
