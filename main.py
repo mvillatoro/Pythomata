@@ -7,33 +7,33 @@ from tkinter.filedialog import askopenfilename
 from tkinter.simpledialog import askstring
 
 
-def draw_circle(canv, x, y, state_name):
+def draw_circle(canvas, x, y, state_name):
     split_text = state_name.split(",")
 
-    if split_text[1] == "I":
-        if not GUI.au.create_state(split_text[0], True, False):
-            GUI.draw_circle_aux(canv, x, y, '#66b3ff', split_text[0])
-        else:
-            messagebox.showinfo("Alert", "El estado ya existe")
-    if split_text[1] == "N":
-        if not GUI.au.create_state(split_text[0], False, False):
-            GUI.draw_circle_aux(canv, x, y, '#669999', split_text[0])
-        else:
-            messagebox.showinfo("Alert", "El estado ya existe")
-    if split_text[1] == "F":
-        if not GUI.au.create_state(split_text[0], False, True):
-            GUI.draw_circle_aux(canv, x, y, '#99ff99', split_text[0])
-        else:
-            messagebox.showinfo("Alert", "El estado ya existe")
-    if split_text[1] == "IF":
-        if not GUI.au.create_state(split_text[0], True, True):
-            GUI.draw_circle_aux(canv, x, y, '#99ff99', split_text[0])
-        else:
-            messagebox.showinfo("Alert", "El estado ya existe")
+    if len(split_text) == 2:
+        if split_text[1] == "I":
+            if not GUI.au.create_state(split_text[0], True, False):
+                GUI.draw_circle_aux(canvas, x, y, '#66b3ff', split_text[0])
+            else:
+                messagebox.showinfo("Alert", "El estado ya existe")
+        if split_text[1] == "N":
+            if not GUI.au.create_state(split_text[0], False, False):
+                GUI.draw_circle_aux(canvas, x, y, '#669999', split_text[0])
+            else:
+                messagebox.showinfo("Alert", "El estado ya existe")
+        if split_text[1] == "F":
+            if not GUI.au.create_state(split_text[0], False, True):
+                GUI.draw_circle_aux(canvas, x, y, '#99ff99', split_text[0])
+            else:
+                messagebox.showinfo("Alert", "El estado ya existe")
+        if split_text[1] == "IF":
+            if not GUI.au.create_state(split_text[0], True, True):
+                GUI.draw_circle_aux(canvas, x, y, '#99ff99', split_text[0])
+            else:
+                messagebox.showinfo("Alert", "El estado ya existe")
 
 
 def get_all_state_components(item_id):
-
     i = 0
 
     for sc in GUI.state_nodes:
@@ -46,7 +46,8 @@ def get_all_state_components(item_id):
                 return sc.type, sc.node_origin_name, sc.transition_char, sc.node_destiny_name, sc.char_id, sc.edge_id, i
             i += 1
 
-class node_data():
+
+class node_data:
     def __init__(self, x_pos, y_pos, node_name, fill_color, label_id, node_id):
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -56,7 +57,8 @@ class node_data():
         self.node_id = node_id
         self.type = "node"
 
-class edge_data():
+
+class edge_data:
     def __init__(self, node_origin_id, node_destiny_id, x_pos_a, y_pos_a, x_pos_b, y_pos_b, transition_char,
                  char_id, edge_id, node_origin_name, node_destiny_name):
         self.node_origin = node_origin_id
@@ -71,6 +73,20 @@ class edge_data():
         self.x_pos_b = x_pos_b
         self.y_pos_b = y_pos_b
         self.type = "edge"
+
+
+def convert_nfa_to_dfa():
+    GUI.record_state_position = True
+
+
+def get_text_from_file(save_name):
+    text_automtata = ""
+    f = open(save_name, "r")
+
+    if f.mode == 'r':
+        text_automtata = f.read()
+
+    return text_automtata
 
 
 class GUI(Frame):
@@ -91,10 +107,11 @@ class GUI(Frame):
 """
     # DFA
     # NFA
-
     # NFA->DFA
     # NFA-E
     # NFA-E>DFA
+    # ER->NFAE
+    # DFA->ER
 
     drawing_area = None
     au = Automata("nfa")
@@ -103,6 +120,9 @@ class GUI(Frame):
     edit_states = False
     automataType = None
     nfa_to_dfa_button = None
+
+    state_position = []
+    record_state_position = False
 
     def __init__(self):
         super().__init__()
@@ -132,25 +152,26 @@ class GUI(Frame):
         test_string_button = Button(self, text="Test String", command=self.test_string_fun)
         test_string_button.place(x=20, y=579)
 
-        new_transition_button = Button(self, text="Edit states", command=self.change_edit_state)
+        new_transition_button = Button(self, text="Delete state", command=self.change_edit_state)
         new_transition_button.place(x=115, y=549)
 
-        nfa_to_dfa_button = Button(self, text="NFA -> DFA", command=self.convert_nfa_to_dfa)
+        nfa_to_dfa_button = Button(self, text="State position", command=convert_nfa_to_dfa)
         nfa_to_dfa_button.place(x=200, y=549)
-  #      nfa_to_dfa_button.place_forget()
 
-        GUI.automataType = IntVar()
+        dfa_autoamta_button = Button(self, text="DFA", command=self.switch_automata("NFA"))
+        dfa_autoamta_button.place(x=800, y=20)
 
-        radio_1 = Radiobutton(self.master, text="DFA", variable=self.automataType, value=1, command=self.choose_automata)
-        radio_1.place(x=800, y=20)
-        radio_2 = Radiobutton(self.master, text="NFA", variable=self.automataType, value=2, command=self.choose_automata)
-        radio_2.place(x=800, y=40)
+        nfa_autoamta_button = Button(self, text="NFA", command=self.switch_automata("DFA"))
+        nfa_autoamta_button.place(x=800, y=50)
 
         save_automata_button = Button(self, text="Save automata", command=self.save_automata)
         save_automata_button.place(x=800, y=490)
 
-        load_automata_button = Button(self, text="Load automata", command=self.load_automtata)
+        load_automata_button = Button(self, text="Load automata", command=self.load_automata)
         load_automata_button.place(x=800, y=520)
+
+    def switch_automata(self, automata_type):
+        self.master.title("Pythomatas: " + automata_type)
 
     def save_automata(self):
         file_name = askstring('File name', "")
@@ -158,26 +179,26 @@ class GUI(Frame):
             if self.au.save_automata(file_name):
                 messagebox.showinfo("Result", "El automata se salvo")
 
-    def load_automtata(self):
+    def create_self_transition(self, transition_char, x, y, state, node_id):
+
+        text_id = GUI.drawing_area.create_text(x, y-50, text=transition_char, font=("Purisa", 12))
+        edge_left_id = GUI.drawing_area.create_line(x-18, y-18, x-15, y-40, tags=("line",))
+        edge_top_id = GUI.drawing_area.create_line(x-15, y-40, x+15, y-40, tags=("line",))
+        edge_right_id = GUI.drawing_area.create_line(x+15, y-40, x+18, y-20, tags=("line",), arrow="last")
+
+        self.state_nodes.append(edge_data(node_id, node_id, x-18, y-18, x-15, y-40, transition_char, text_id,
+                                          edge_left_id, state, state))
+        self.state_nodes.append(edge_data(node_id, node_id, x-15, y-40, x+15, y-40, transition_char, text_id,
+                                          edge_top_id, state, state))
+        self.state_nodes.append(edge_data(node_id, node_id, x+15, y-40, x+18, y-20, transition_char, text_id,
+                                          edge_right_id, state, state))
+
+    def load_automata(self):
 
         f_name = askopenfilename()
-        print(f_name)
         if f_name:
-            if self.au.load_automata(f_name):
-                messagebox.showinfo("Result", "El automata se cargo")
-
-
-    def choose_automata(self):
-        selection = str(self.automataType.get())
-        if selection == 1:
-            GUI.au = Automata("dfa")
-            GUI.nfa_to_dfa_button.place_forget()
-        elif selection == 2:
-            GUI.au = Automata("nfa")
-
-    def convert_nfa_to_dfa(self):
-        self.au.save_automata()
-        return EvaluateAutomata().nfa_to_dfa(GUI.au)
+            automata_text = get_text_from_file(f_name)
+            self.generate_text_automata(automata_text)
 
     def change_edit_state(self):
         if GUI.edit_states:
@@ -192,14 +213,20 @@ class GUI(Frame):
 
         if transition_data:
             ntd = transition_data.split(",")
-            if self.au.create_transition(ntd[0], ntd[2], ntd[1]):
-               self.draw_line(ntd[0], ntd[2], ntd[1])
-            else:
-                messagebox.showinfo("Info", "La transision no se creo")
+
+            if len(ntd) == 3:
+                if self.au.create_transition(ntd[0], ntd[2], ntd[1]):
+                    self.draw_line(ntd[0], ntd[2], ntd[1])
+                else:
+                    messagebox.showinfo("Info", "La transision no se creo")
 
     def draw_line(self, state1, state2, transition_char):
         x1, y1, node_id1 = self.get_state_data(state1)
         x2, y2, node_id2 = self.get_state_data(state2)
+
+        if node_id1 == node_id2:
+            self.create_self_transition(transition_char, x1, y1, state1, node_id1)
+            return
 
         tlx = (int(x1) + int(x2)) / 2
         tly = (int(y1) + int(y2)) / 2
@@ -232,9 +259,6 @@ class GUI(Frame):
         edge_id = GUI.drawing_area.create_line(xa, ya, xb, yb, tags=("line",), arrow="last")
         self.state_nodes.append(edge_data(node_id1, node_id2, xa, ya, xb, yb, transition_char, text_id, edge_id,
                                           state1, state2))
-
-    def move_node(event):
-        GUI.drawing_area.move(ALL, 1, 1)
 
     def get_state_data(self, state_name):
         for sn in self.state_nodes:
@@ -278,11 +302,11 @@ class GUI(Frame):
 
                 for sn in GUI.state_nodes:
                     if sn.type == "edge":
-                        GUI.drawing_area.delete(sn.char_id)
-                        GUI.drawing_area.delete(sn.edge_id)
+                        if sn.node_origin == item[0] or sn.node_destiny == item[0]:
+                            GUI.drawing_area.delete(sn.char_id)
+                            GUI.drawing_area.delete(sn.edge_id)
 
-            else:
-                print(str(state_name) + " ," + str(element1) + ", " + str(element2))
+            if object_type == "edge":
                 GUI.au.delete_transition(state_name, element1, element2)
                 GUI.drawing_area.delete(c_id)
                 GUI.drawing_area.delete(e_id)
@@ -297,12 +321,35 @@ class GUI(Frame):
         y = (sh - h) / 2
         self.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
+    def generate_text_automata(self, automata_text):
+
+        state_transition_division = automata_text.split("*")
+        states_division = state_transition_division[0].split("|")
+        transition_division = state_transition_division[1].split("|")
+
+        i = 0
+        for sd in states_division:
+            draw_circle(self.drawing_area, self.state_position[i][0], self.state_position[i][1], sd)
+            i += 1
+
+        for td in transition_division:
+            ntd = td.split(",")
+            self.au.create_transition(ntd[0], ntd[2], ntd[1])
+            self.draw_line(ntd[0], ntd[2], ntd[1])
+
+    def get_mouse_data(event):
+        if GUI.record_state_position:
+            GUI.global_x = event.x
+            GUI.global_y = event.y
+            GUI.state_position.append([GUI.global_x, GUI.global_y])
+            print(GUI.global_x, GUI.global_y)
 
 
 def main():
     root = Tk()
     app = GUI()
     GUI.drawing_area.bind("<Double-Button-1>", GUI.canvas_operations)
+    GUI.drawing_area.bind("<Button-1>", GUI.get_mouse_data)
     # root.bind("<B1-Motion>", GUI.move_node)
     root.mainloop()
 
