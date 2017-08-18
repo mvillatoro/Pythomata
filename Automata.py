@@ -131,7 +131,8 @@ class Automata:
     def get_alphabet(self):
         alphabet = []
         for transition in self.transitionList:
-            alphabet.append(transition.transitionChar)
+            if transition.transitionChar not in alphabet:
+                alphabet.append(transition.transitionChar)
 
         return alphabet
 

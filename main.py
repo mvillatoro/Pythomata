@@ -109,9 +109,15 @@ class GUI(Frame):
     # NFA
     # NFA->DFA
     # NFA-E
+
     # NFA-E>DFA
     # ER->NFAE
     # DFA->ER
+
+    # Union
+    # Interseccion
+    # Complemento
+    # Reflexion (regex)
 
     drawing_area = None
     au = Automata("nfa")
@@ -158,11 +164,14 @@ class GUI(Frame):
         nfa_to_dfa_button = Button(self, text="State position", command=convert_nfa_to_dfa)
         nfa_to_dfa_button.place(x=200, y=549)
 
-        dfa_autoamta_button = Button(self, text="DFA", command=self.switch_automata("NFA"))
+        dfa_autoamta_button = Button(self, text="DFA", command=self.switch_automata)
         dfa_autoamta_button.place(x=800, y=20)
 
-        nfa_autoamta_button = Button(self, text="NFA", command=self.switch_automata("DFA"))
+        nfa_autoamta_button = Button(self, text="NFA", command=self.switch_automata)
         nfa_autoamta_button.place(x=800, y=50)
+
+        nfa_autoamta_button = Button(self, text="TO DFA", command=self.nfa_to_dfa)
+        nfa_autoamta_button.place(x=880, y=50)
 
         save_automata_button = Button(self, text="Save automata", command=self.save_automata)
         save_automata_button.place(x=800, y=490)
@@ -172,6 +181,9 @@ class GUI(Frame):
 
     def switch_automata(self, automata_type):
         self.master.title("Pythomatas: " + automata_type)
+
+    def nfa_to_dfa(self):
+        result = EvaluateAutomata().nfa_to_dfa(self.au)
 
     def save_automata(self):
         file_name = askstring('File name', "")

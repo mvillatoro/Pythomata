@@ -1,6 +1,7 @@
 from AutomataActions import AutomataActions
 from Automata import Automata
-from State import State
+from Transition import Transition
+
 
 class EvaluateAutomata:
     def evaluate_dfa(self, test_string, automata):
@@ -33,36 +34,34 @@ class EvaluateAutomata:
         return False
 
     def nfa_to_dfa(self, nfa_automata):
-        new_dfa_automata = Automata("dfa")
-        states_list = []
-        dfa_table = []
+        new_states = [nfa_automata.get_initial_node()]
+        new_transitions = []
+
         alphabet = nfa_automata.get_alphabet()
 
-        dfa_nodes = [nfa_automata.get_initial_node()]
+        for ns in new_states:
+            print("lol")
+            for s in alphabet:
+                next_states = []
+                states = AutomataActions().get_next_states(ns, s, nfa_automata.transitionList)
 
-        for dn in dfa_nodes:
-            for symbol in alphabet:
-                transition = nfa_automata.get_transition_data(dn, symbol)
+                if len(states) == 0:
+                    continue
 
-                new_state_text = ""
+                for nsa in states:
+                    if nsa not in next_states:
+                        next_states.append(nsa)
 
-                for tr in transition:
-                    new_state_text = new_state_text + tr.destinationState.stateName + ","
+                state = AutomataActions().join_states(next_states)
 
-                new_state_text = new_state_text[:-1]
+                if not self.state_exists_in_automata(state.stateName, new_states):
+                    print(state.stateName)
+                    new_states.append(state)
 
-                new_state = State(new_state_text, False, False)
+                if not self.check_dfa_transition_in_automata(ns, s, new_transitions):
+                    new_transitions.append(Transition(ns, state, s))
 
-                if new_state not in dfa_nodes:
-                    print(new_state)
-                    dfa_nodes.append(new_state)
-
-                new_state_text = ""
-
-        for dn2 in dfa_nodes:
-            print(dn2.stateName)
-
-        return False
+        return AutomataActions().transformation_save_automata(new_states, new_transitions)
 
     def evaluate_nfa_e(self, test_string, automata):
 
@@ -89,4 +88,16 @@ class EvaluateAutomata:
             if cn.accepted:
                 return True
 
+        return False
+
+    def state_exists_in_automata(self, state_name, state_list):
+        for state in state_list:
+            if state.stateName == state_name:
+                return True
+        return False
+
+    def check_dfa_transition_in_automata(self, state, transition_char, transition_list):
+        for transition in transition_list:
+            if transition.originState.stateName == state.stateName and transition.transitionChar == transition_char:
+                return True
         return False
