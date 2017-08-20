@@ -40,7 +40,6 @@ class EvaluateAutomata:
         alphabet = nfa_automata.get_alphabet()
 
         for ns in new_states:
-            print("lol")
             for s in alphabet:
                 next_states = []
                 states = AutomataActions().get_next_states(ns, s, nfa_automata.transitionList)
@@ -55,7 +54,6 @@ class EvaluateAutomata:
                 state = AutomataActions().join_states(next_states)
 
                 if not self.state_exists_in_automata(state.stateName, new_states):
-                    print(state.stateName)
                     new_states.append(state)
 
                 if not self.check_dfa_transition_in_automata(ns, s, new_transitions):
@@ -101,3 +99,48 @@ class EvaluateAutomata:
             if transition.originState.stateName == state.stateName and transition.transitionChar == transition_char:
                 return True
         return False
+
+    def nfae_to_dfa(self, nfae_automata):
+
+        e_closure_states = []
+
+        for state in nfae_automata.stateList:
+            states = AutomataActions().state_e_closure(state, nfae_automata.transitionList)
+
+            n_states = AutomataActions().join_states(states)
+
+            e_closure_states.append(n_states)
+
+        alphabet = nfae_automata.get_alphabet()
+        alphabet.remove('e')
+
+        new_states = [AutomataActions().get_initial_node(e_closure_states)]
+        new_transitions = []
+
+        for ns in new_states:
+            for s in alphabet:
+                next_states = []
+                r_states = AutomataActions().get_next_states(ns, s, nfae_automata.transitionList)
+
+                if len(r_states) == 0:
+                    continue
+
+                for rs in r_states:
+                    if rs not in next_states:
+                        next_states.append(rs)
+
+                for rs2 in r_states:
+                    c_states = AutomataActions().state_e_closure(rs2, nfae_automata.transitionList)
+                    for cs in c_states:
+                        if cs not in next_states:
+                            next_states.append(cs)
+
+                combined_states = AutomataActions().join_states(next_states)
+
+                if not self.state_exists_in_automata(combined_states.stateName, new_states):
+                    new_states.append(combined_states)
+
+                if not self.check_dfa_transition_in_automata(ns, s, new_transitions):
+                    new_transitions.append(Transition(ns, combined_states, s))
+
+        return AutomataActions().transformation_save_automata(new_states, new_transitions)

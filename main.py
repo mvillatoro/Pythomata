@@ -109,10 +109,10 @@ class GUI(Frame):
     # NFA
     # NFA->DFA
     # NFA-E
-
     # NFA-E>DFA
+
     # ER->NFAE
-    # DFA->ER
+    # DFA->ERl
 
     # Union
     # Interseccion
@@ -158,11 +158,11 @@ class GUI(Frame):
         test_string_button = Button(self, text="Test String", command=self.test_string_fun)
         test_string_button.place(x=20, y=579)
 
-        new_transition_button = Button(self, text="Delete state", command=self.change_edit_state)
-        new_transition_button.place(x=115, y=549)
+        delete_button = Button(self, text="Delete", command=self.change_edit_state)
+        delete_button.place(x=115, y=549)
 
-        nfa_to_dfa_button = Button(self, text="State position", command=convert_nfa_to_dfa)
-        nfa_to_dfa_button.place(x=200, y=549)
+        state_pos = Button(self, text="State position", command=convert_nfa_to_dfa)
+        state_pos.place(x=200, y=549)
 
         dfa_autoamta_button = Button(self, text="DFA", command=self.switch_automata)
         dfa_autoamta_button.place(x=800, y=20)
@@ -170,8 +170,11 @@ class GUI(Frame):
         nfa_autoamta_button = Button(self, text="NFA", command=self.switch_automata)
         nfa_autoamta_button.place(x=800, y=50)
 
-        nfa_autoamta_button = Button(self, text="TO DFA", command=self.nfa_to_dfa)
-        nfa_autoamta_button.place(x=880, y=50)
+        nfa_to_dfa_button = Button(self, text="To DFA", command=self.nfa_to_dfa)
+        nfa_to_dfa_button.place(x=880, y=50)
+
+        nfae_to_dfa_button = Button(self, text="NFA-ε to DFA", command=self.convert_nfae_to_dfa)
+        nfae_to_dfa_button.place(x=800, y=80)
 
         save_automata_button = Button(self, text="Save automata", command=self.save_automata)
         save_automata_button.place(x=800, y=490)
@@ -179,11 +182,21 @@ class GUI(Frame):
         load_automata_button = Button(self, text="Load automata", command=self.load_automata)
         load_automata_button.place(x=800, y=520)
 
+        clear_all_button = Button(self, text="Clear", command=lambda:self.clear_canvas(True))
+        clear_all_button.place(x=800, y=460)
+
     def switch_automata(self, automata_type):
         self.master.title("Pythomatas: " + automata_type)
 
     def nfa_to_dfa(self):
         result = EvaluateAutomata().nfa_to_dfa(self.au)
+        self.clear_canvas(False)
+        self.generate_text_automata(result)
+
+    def convert_nfae_to_dfa(self):
+        result = EvaluateAutomata().nfae_to_dfa(self.au)
+        self.clear_canvas(False)
+        self.generate_text_automata(result)
 
     def save_automata(self):
         file_name = askstring('File name', "")
@@ -355,6 +368,18 @@ class GUI(Frame):
             GUI.global_y = event.y
             GUI.state_position.append([GUI.global_x, GUI.global_y])
             print(GUI.global_x, GUI.global_y)
+
+    def clear_canvas(self, full_clear):
+
+        self.drawing_area.delete(ALL)
+        GUI.state_nodes = []
+        GUI.au = Automata("nfa")
+        GUI.transition_edge = []
+        GUI.automataType = None
+        GUI.nfa_to_dfa_button = None
+
+        if full_clear:
+            GUI.state_position = []
 
 
 def main():

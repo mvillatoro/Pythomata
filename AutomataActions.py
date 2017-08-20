@@ -99,3 +99,17 @@ class AutomataActions:
         f.write(state_string)
 
         return state_string
+
+    def state_e_closure(self, state, transition_list):
+        return_state = [state]
+
+        for transition in transition_list:
+            if state.stateName == transition.originState.stateName and transition.transitionChar == "e":
+                return_state.append(transition.destinationState)
+
+        return return_state
+
+    def get_initial_node(self, stateList):
+        for state in stateList:
+            if state.isInitial:
+                return state
