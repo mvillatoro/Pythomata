@@ -28,7 +28,7 @@ def draw_circle(canvas, x, y, state_name):
                 messagebox.showinfo("Alert", "El estado ya existe")
         if split_text[1] == "IF":
             if not GUI.au.create_state(split_text[0], True, True):
-                GUI.draw_circle_aux(canvas, x, y, '#99ff99', split_text[0])
+                GUI.draw_circle_aux(canvas, x, y, '#ff66ff', split_text[0])
             else:
                 messagebox.showinfo("Alert", "El estado ya existe")
 
@@ -197,6 +197,7 @@ class GUI(Frame):
         result = EvaluateAutomata().nfae_to_dfa(self.au)
         self.clear_canvas(False)
         self.generate_text_automata(result)
+        self.print_states_transitions()
 
     def save_automata(self):
         file_name = askstring('File name', "")
@@ -375,12 +376,13 @@ class GUI(Frame):
         GUI.state_nodes = []
         GUI.au = Automata("nfa")
         GUI.transition_edge = []
-        GUI.automataType = None
-        GUI.nfa_to_dfa_button = None
 
         if full_clear:
             GUI.state_position = []
 
+    def print_states_transitions(self):
+        self.au.list_transitions()
+        self.au.list_states()
 
 def main():
     root = Tk()

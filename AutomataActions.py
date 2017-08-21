@@ -12,9 +12,6 @@ class AutomataActions:
 
         list_to_return = []
 
-        if '.' in origin.stateName:
-            return self.get_next_multi_state(origin.stateName, transition_char, transition_list)
-
         for transition in transition_list:
             if transition.originState.stateName == origin.stateName and transition.transitionChar == transition_char:
                 list_to_return.append(transition.destinationState)
@@ -113,3 +110,15 @@ class AutomataActions:
         for state in stateList:
             if state.isInitial:
                 return state
+
+    def get_next_dot_state(self, origin, transition_char, transition_list):
+
+        list_to_return = []
+
+        if '.' in origin.stateName:
+            return self.get_next_multi_state(origin.stateName, transition_char, transition_list)
+
+        for transition in transition_list:
+            if transition.originState.stateName == origin.stateName and transition.transitionChar == transition_char:
+                list_to_return.append(transition.destinationState)
+        return list_to_return

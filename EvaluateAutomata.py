@@ -72,6 +72,7 @@ class EvaluateAutomata:
 
                 for cs in closure_states:
                     states = AutomataActions().get_next_states(cs, c, automata.transitionList)
+
                     for s in states:
                         temp_list.append(s)
 
@@ -120,7 +121,7 @@ class EvaluateAutomata:
         for ns in new_states:
             for s in alphabet:
                 next_states = []
-                r_states = AutomataActions().get_next_states(ns, s, nfae_automata.transitionList)
+                r_states = AutomataActions().get_next_dot_state(ns, s, nfae_automata.transitionList)
 
                 if len(r_states) == 0:
                     continue
