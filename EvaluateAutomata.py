@@ -152,28 +152,14 @@ class EvaluateAutomata:
 
     def automata_operations(self, automata, operation):
 
-        if operation == "union":
-            return self.join_automata(automata, "u")
-        elif operation == "intersection":
-            return self.join_automata(automata, "i")
-        elif operation == "compliment":
-            self.automata_compliment(automata)
-        elif operation == "difference":
-            self.automata_difference(automata)
-        elif operation == "reflexion":
-            self.automata_reflexion(automata)
+        if operation == "r":
+            return self.reflexion_automtata(automata)
+        elif operation == "c":
+            print("compliment")
+        elif operation == "d":
+            print("difference")
 
-    def automata_compliment(self, automata):
-        print("compliment")
-
-    def automata_difference(self, automata):
-        print("difference")
-
-    def automata_reflexion(self, automata):
-        print("reflexion")
-
-    def minimize_automata(self, automata):
-        print("minimize")
+        return self.join_automata(automata, operation)
 
     def join_automata(self, automata, operation):
         alphabet = automata.get_alphabet()
@@ -192,3 +178,15 @@ class EvaluateAutomata:
                     new_transitions.append(Transition(cn, states, a))
 
         return AutomataActions().transformation_save_automata(current_states, new_transitions)
+
+    def reflexion_automtata(self, automata):
+        text_automata = automata.save_automata("none", "n")
+        i = 0
+        for ta in text_automata:
+            if ta == "I":
+                text_automata = text_automata[:i] + "F" + text_automata[i + 1:]
+            elif ta == "F":
+                text_automata = text_automata[:i] + "I" + text_automata[i + 1:]
+            i += 1
+
+        return text_automata

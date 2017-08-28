@@ -151,14 +151,13 @@ class Automata:
 
         return transitions
 
-    def save_automata(self, save_name):
+    def save_automata(self, save_name, op):
         state_string = ""
 
         if len(self.stateList) == 0:
             return False
 
         for state in self.stateList:
-            string_builder = ""
             string_builder = state.stateName + ","
             if state.isInitial and state.accepted:
                 string_builder = string_builder + "IF"
@@ -183,10 +182,12 @@ class Automata:
 
         state_string = state_string[:-1]
 
-        f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".ptm", "w+")
-        f.write(state_string)
-
-        return True
+        if op == "y":
+            f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".ptm", "w+")
+            f.write(state_string)
+            return True
+        else:
+            return state_string
 
     def load_automata(self, save_name):
 
@@ -227,3 +228,82 @@ class Automata:
             if element.stateName == lst.stateName:
                 return True
         return False
+
+    def minimize(self):
+        minimize_table = self.minimize_table()
+
+    def minimize_table(self):
+
+        state_count = len(self.stateList)+1
+
+        state_matrix = [["n" for x in range(state_count)] for y in range(state_count)]
+
+        count = 0
+        while count < len(self.stateList):
+            state_matrix[0][count+1] = self.stateList[count]
+            count += 1
+
+        count_2 = 0
+        while count_2 < len(self.stateList):
+            state_matrix[count_2+1][0] = self.stateList[count_2]
+            count_2 += 1
+
+        count_3 = 0
+        while count_3 < len(self.stateList):
+            count_4 = 0
+            while count_4 < len(self.stateList):
+                if count_3 <= count_4:
+                    state_matrix[count_3+1][count_4+1] = "E"
+                count_4 += 1
+            count_3 += 1
+
+        state_matrix[0][0] = "p"
+
+        count_5 = 0
+        while count_5 < len(self.stateList)+1:
+            count_6 = 0
+            while count_6 < len(self.stateList)+1:
+
+                if state_matrix[count_5][count_6] == "E":
+                    pass
+                elif isinstance(state_matrix[count_6][0], State) and isinstance(state_matrix[0][count_5], State):
+                    print(state_matrix[count_6][0].stateName + ", " + state_matrix[0][count_5].stateName)
+
+                    if state_matrix[count_6][0].accepted and state_matrix[0][count_5].accepted:
+                        pass
+                    elif state_matrix[count_6][0].accepted or state_matrix[0][count_5].accepted:
+                        state_matrix[count_5][count_6] = "X"
+                    else:
+                        self.compare_states(state_matrix[count_6][0], state_matrix[0][count_5])
+
+                count_6 += 1
+            count_5 += 1
+
+        self.print_matrix_state_matrix(state_matrix)
+
+    def print_matrix_state_matrix(self, state_matrix):
+        for x in state_matrix:
+            string_data = ""
+            for y in x:
+                if isinstance(y, State):
+                    string_data += y.stateName + ", "
+                else:
+                    string_data += y + ", "
+            print(string_data)
+
+    def compare_states(self, state_a, state_b):
+        alphabet = self.get_alphabet()
+
+        next_state_a = []
+        next_state_b = []
+
+        for a in alphabet:
+            for transition in self.transitionList:
+                if transition.originState.stateName == state_a.stateName and transition.transitionChar == a:
+                    next_state_a.append(transition.destinationState)
+
+            for transition_b in self.transitionList:
+                if transition_b.originState.stateName == state_b.stateName and transition_b.transitionChar == a:
+                    next_state_b.append(transition_b.destinationState)
+
+

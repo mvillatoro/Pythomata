@@ -12,7 +12,7 @@ def draw_circle(canvas, x, y, state_name):
     split_text = state_name.split(",")
 
     if len(split_text) == 2:
-        if split_text[1] == "I":
+        if split_text[1] == "I" or split_text[1] == "II":
             if not GUI.au.create_state(split_text[0], True, False):
                 GUI.draw_circle_aux(canvas, x, y, '#66b3ff', split_text[0])
             else:
@@ -22,12 +22,12 @@ def draw_circle(canvas, x, y, state_name):
                 GUI.draw_circle_aux(canvas, x, y, '#669999', split_text[0])
             else:
                 messagebox.showinfo("Alert", "El estado ya existe")
-        if split_text[1] == "F":
+        if split_text[1] == "F" or split_text[1] =="FF":
             if not GUI.au.create_state(split_text[0], False, True):
                 GUI.draw_circle_aux(canvas, x, y, '#99ff99', split_text[0])
             else:
                 messagebox.showinfo("Alert", "El estado ya existe")
-        if split_text[1] == "IF":
+        if split_text[1] == "IF" or split_text[1] == "FI":
             if not GUI.au.create_state(split_text[0], True, True):
                 GUI.draw_circle_aux(canvas, x, y, '#ff66ff', split_text[0])
             else:
@@ -196,19 +196,19 @@ class GUI(Frame):
         # show_new_drawing_area_button = Button(self, text="Draw new Automata", command=self.show_new_area)
         # show_new_drawing_area_button.place(x=800, y=200)
 
-        union_button = Button(self, text="Union", command=lambda: self.automata_operations("union"))
+        union_button = Button(self, text="Union", command=lambda: self.automata_operations("u"))
         union_button.place(x=800, y=130)
 
-        compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("compliment"))
+        compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("c"))
         compliment_button.place(x=800, y=160)
 
-        reflexion_button = Button(self, text="Reflexion", command=lambda: self.automata_operations("reflexion"))
+        reflexion_button = Button(self, text="Reflexion", command=lambda: self.automata_operations("r"))
         reflexion_button.place(x=800, y=190)
 
-        intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("intersection"))
+        intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("i"))
         intersection_button.place(x=880, y=130)
 
-        difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("difference"))
+        difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("d"))
         difference_button.place(x=880, y=160)
 
         minimize_button = Button(self, text="Minimize", command=self.minimize_automata)
@@ -220,7 +220,9 @@ class GUI(Frame):
         self.generate_text_automata(result)
 
     def minimize_automata(self):
-        result = EvaluateAutomata().minimize_automata(self.au)
+        result = self.au.minimize()
+#         self.clear_canvas(False)
+#         self.generate_text_automata(result)
 
     def show_new_area(self):
         t = Toplevel(self)
@@ -266,7 +268,7 @@ class GUI(Frame):
     def save_automata(self):
         file_name = askstring('File name', "")
         if file_name:
-            if self.au.save_automata(file_name):
+            if self.au.save_automata(file_name, "y"):
                 messagebox.showinfo("Result", "El automata se salvo")
 
     def create_self_transition(self, transition_char, x, y, state, node_id):
