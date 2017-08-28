@@ -13,7 +13,7 @@ class EvaluateAutomata:
         return current_node.accepted
 
     def evaluate_nfa(self, test_string, automata):
-        current_nodes = [automata.get_initial_node()]
+        current_nodes = [automata.get_initial_nodes()]
 
         for c in test_string:
             temp_list = []
@@ -42,7 +42,7 @@ class EvaluateAutomata:
         for ns in new_states:
             for s in alphabet:
                 next_states = []
-                states = AutomataActions().get_next_states(ns, s, nfa_automata.transitionList)
+                states = AutomataActions().get_next_dot_state(ns, s, nfa_automata.transitionList)
 
                 if len(states) == 0:
                     continue
@@ -63,7 +63,11 @@ class EvaluateAutomata:
 
     def evaluate_nfa_e(self, test_string, automata):
 
-        current_nodes = [automata.get_initial_node()]
+        initial_nodes = automata.get_initial_nodes()
+        current_nodes = []
+
+        for ins in initial_nodes:
+            current_nodes.append(ins)
 
         for c in test_string:
             temp_list = []
@@ -145,3 +149,46 @@ class EvaluateAutomata:
                     new_transitions.append(Transition(ns, combined_states, s))
 
         return AutomataActions().transformation_save_automata(new_states, new_transitions)
+
+    def automata_operations(self, automata, operation):
+
+        if operation == "union":
+            return self.join_automata(automata, "u")
+        elif operation == "intersection":
+            return self.join_automata(automata, "i")
+        elif operation == "compliment":
+            self.automata_compliment(automata)
+        elif operation == "difference":
+            self.automata_difference(automata)
+        elif operation == "reflexion":
+            self.automata_reflexion(automata)
+
+    def automata_compliment(self, automata):
+        print("compliment")
+
+    def automata_difference(self, automata):
+        print("difference")
+
+    def automata_reflexion(self, automata):
+        print("reflexion")
+
+    def minimize_automata(self, automata):
+        print("minimize")
+
+    def join_automata(self, automata, operation):
+        alphabet = automata.get_alphabet()
+
+        current_states = [AutomataActions().join_states_operation(automata.get_initial_nodes(), operation)]
+        new_transitions = []
+
+        for cn in current_states:
+            for a in alphabet:
+                states = AutomataActions().join_states_operation(AutomataActions().get_next_dot_state(cn, a, automata.transitionList), operation)
+
+                if not self.state_exists_in_automata(states.stateName, current_states):
+                    current_states.append(states)
+
+                if not self.check_dfa_transition_in_automata(cn, a, new_transitions):
+                    new_transitions.append(Transition(cn, states, a))
+
+        return AutomataActions().transformation_save_automata(current_states, new_transitions)

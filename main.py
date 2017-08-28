@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter.filedialog import askopenfilename
 from tkinter.simpledialog import askstring
+from RegexActions import Regex
 
 
 def draw_circle(canvas, x, y, state_name):
@@ -110,17 +111,20 @@ class GUI(Frame):
     # NFA->DFA
     # NFA-E
     # NFA-E>DFA
-
-    # ER->NFAE
-    # DFA->ERl
-
     # Union
     # Interseccion
+
+    # ER->NFAE
+    # DFA->ER
+
+    # Resta
     # Complemento
     # Reflexion (regex)
 
     drawing_area = None
+    operations_drawing_Area = None
     au = Automata("nfa")
+    oau = Automata("nfa")
     state_nodes = []
     transition_edge = []
     edit_states = False
@@ -141,8 +145,6 @@ class GUI(Frame):
         GUI.state_nodes.append(node_data(x, y, label_text, fill_color, text_id, oval_id))
 
     def init_ui(self):
-
-        # au.generate_automata("a,I|b,F*a,0,a|a,1,a|a,1,b")
         self.master.title("Pythomatas")
         self.pack(fill=BOTH, expand=1)
         self.center_window()
@@ -155,8 +157,11 @@ class GUI(Frame):
         new_transition_button = Button(self, text="New Transiton", command=self.create_transition_aux)
         new_transition_button.place(x=20, y=549)
 
-        test_string_button = Button(self, text="Test String", command=self.test_string_fun)
-        test_string_button.place(x=20, y=579)
+        test_input = Entry(self, width=25)
+        test_input.place(x=20, y=590)
+
+        test_string_button = Button(self, text="Test String", command=lambda: self.test_string_fun(test_input.get()))
+        test_string_button.place(x=200, y=590)
 
         delete_button = Button(self, text="Delete", command=self.change_edit_state)
         delete_button.place(x=115, y=549)
@@ -164,14 +169,11 @@ class GUI(Frame):
         state_pos = Button(self, text="State position", command=convert_nfa_to_dfa)
         state_pos.place(x=200, y=549)
 
-        dfa_autoamta_button = Button(self, text="DFA", command=self.switch_automata)
-        dfa_autoamta_button.place(x=800, y=20)
-
-        nfa_autoamta_button = Button(self, text="NFA", command=self.switch_automata)
-        nfa_autoamta_button.place(x=800, y=50)
+        dfa_to_regex_button = Button(self, text="TO REGEX", command=self.switch_automata)
+        dfa_to_regex_button.place(x=800, y=20)
 
         nfa_to_dfa_button = Button(self, text="To DFA", command=self.nfa_to_dfa)
-        nfa_to_dfa_button.place(x=880, y=50)
+        nfa_to_dfa_button.place(x=800, y=50)
 
         nfae_to_dfa_button = Button(self, text="NFA-ε to DFA", command=self.convert_nfae_to_dfa)
         nfae_to_dfa_button.place(x=800, y=80)
@@ -182,8 +184,70 @@ class GUI(Frame):
         load_automata_button = Button(self, text="Load automata", command=self.load_automata)
         load_automata_button.place(x=800, y=520)
 
-        clear_all_button = Button(self, text="Clear", command=lambda:self.clear_canvas(True))
+        clear_all_button = Button(self, text="Clear", command=lambda: self.clear_canvas(True))
         clear_all_button.place(x=800, y=460)
+
+        # regex_input = Entry(self, width=30)
+        # regex_input.place(x=800, y=110)
+
+        # test_regex_button = Button(self, text="Test Regex", command=lambda: self.test_regex(regex_input.get()))
+        # test_regex_button.place(x=800, y=140)
+
+        # show_new_drawing_area_button = Button(self, text="Draw new Automata", command=self.show_new_area)
+        # show_new_drawing_area_button.place(x=800, y=200)
+
+        union_button = Button(self, text="Union", command=lambda: self.automata_operations("union"))
+        union_button.place(x=800, y=130)
+
+        compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("compliment"))
+        compliment_button.place(x=800, y=160)
+
+        reflexion_button = Button(self, text="Reflexion", command=lambda: self.automata_operations("reflexion"))
+        reflexion_button.place(x=800, y=190)
+
+        intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("intersection"))
+        intersection_button.place(x=880, y=130)
+
+        difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("difference"))
+        difference_button.place(x=880, y=160)
+
+        minimize_button = Button(self, text="Minimize", command=self.minimize_automata)
+        minimize_button.place(x=800, y=240)
+
+    def automata_operations(self, operation):
+        result = EvaluateAutomata().automata_operations(self.au, operation)
+        self.clear_canvas(False)
+        self.generate_text_automata(result)
+
+    def minimize_automata(self):
+        result = EvaluateAutomata().minimize_automata(self.au)
+
+    def show_new_area(self):
+        t = Toplevel(self)
+        t.geometry('%dx%d+%d+%d' % (760, 520, 480, 250))
+        t.wm_title("Drawing Area")
+
+        new_button = Button(t, text="Draw new Automata", command=self.show_new_area)
+        new_button.place(x=630, y=480)
+
+        GUI.operations_drawing_Area = Canvas(t, bg="#cccccc", height=450, width=730)
+        GUI.operations_drawing_Area.place(x=10, y=10)
+
+    def test_regex(self, regex_string):
+
+        test_string = askstring('Insert string', " ")
+
+
+        if test_string:
+
+            result = Regex(regex_string).text_match(test_string, regex_string)
+
+            if result:
+                messagebox.showinfo("Result", "La cadena fue aceptada")
+            else:
+                messagebox.showinfo("Result", "La cadena no fue aceptada")
+
+            # regex.split_parenthesis(regex_string)
 
     def switch_automata(self, automata_type):
         self.master.title("Pythomatas: " + automata_type)
@@ -197,7 +261,7 @@ class GUI(Frame):
         result = EvaluateAutomata().nfae_to_dfa(self.au)
         self.clear_canvas(False)
         self.generate_text_automata(result)
-        self.print_states_transitions()
+        # self.print_states_transitions()
 
     def save_automata(self):
         file_name = askstring('File name', "")
@@ -292,8 +356,8 @@ class GUI(Frame):
                 if sn.node_name == state_name:
                     return sn.x_pos, sn.y_pos, sn.node_id
 
-    def test_string_fun(self):
-        test_string = askstring('Insert test string', "")
+    def test_string_fun(self, test_string):
+        # test_string = askstring('Insert test string', "")
 
         if test_string:
             result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
@@ -388,7 +452,8 @@ def main():
     root = Tk()
     app = GUI()
     GUI.drawing_area.bind("<Double-Button-1>", GUI.canvas_operations)
-    GUI.drawing_area.bind("<Button-1>", GUI.get_mouse_data)
+    GUI.drawing_area.bind("<Button-1>", GUI.get_mouse_data, GUI.drawing_area)
+
     # root.bind("<B1-Motion>", GUI.move_node)
     root.mainloop()
 

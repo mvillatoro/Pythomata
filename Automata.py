@@ -79,6 +79,13 @@ class Automata:
             if state.isInitial:
                 return state
 
+    def get_initial_nodes(self):
+        initial_nodes = []
+        for state in self.stateList:
+            if state.isInitial:
+                initial_nodes.append(state)
+        return initial_nodes
+
     def generate_automata(self, automata_text):
 
         state_transition_division = automata_text.split("*")

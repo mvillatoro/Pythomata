@@ -37,6 +37,43 @@ class AutomataActions:
 
         return state
 
+    def join_states_operation(self, state_list, operation):
+        state_name = ""
+        is_initial = False
+        accepted = False
+
+        is_initial, accepted = self.get_state_type(state_list, operation)
+
+        for sl in state_list:
+            state_name = state_name + sl.stateName + "."
+
+        state_name = self.order_state_name(state_name[:-1])
+
+        state = State(state_name, is_initial, accepted)
+
+        return state
+
+    def get_state_type(self, state_list, operation):
+
+        states_initial = []
+        states_accepted = []
+
+        initial = False
+        accepted = False
+
+        for sl in state_list:
+            states_initial.append(sl.isInitial)
+            states_accepted.append(sl.accepted)
+
+            initial = all(states_initial)
+
+        if operation == "u":
+            accepted = any(states_accepted)
+        elif operation == "i":
+            accepted = all(states_accepted)
+
+        return initial, accepted
+
     def order_state_name(self, state_name):
         return '.'.join(sorted(state_name.split(".")))
 
@@ -67,7 +104,6 @@ class AutomataActions:
             return False
 
         for state in state_list:
-            string_builder = ""
             string_builder = state.stateName + ","
             if state.isInitial and state.accepted:
                 string_builder = string_builder + "IF"
@@ -92,9 +128,6 @@ class AutomataActions:
 
         state_string = state_string[:-1]
 
-        f = open("C:\\Users\\mvill\\Desktop\\" + "complex_save" + ".ptm", "w+")
-        f.write(state_string)
-
         return state_string
 
     def state_e_closure(self, state, transition_list):
@@ -113,12 +146,13 @@ class AutomataActions:
 
     def get_next_dot_state(self, origin, transition_char, transition_list):
 
-        list_to_return = []
+        # list_to_return = []
 
         if '.' in origin.stateName:
             return self.get_next_multi_state(origin.stateName, transition_char, transition_list)
-
-        for transition in transition_list:
-            if transition.originState.stateName == origin.stateName and transition.transitionChar == transition_char:
-                list_to_return.append(transition.destinationState)
-        return list_to_return
+        else:
+            '''for transition in transition_list:
+                if transition.originState.stateName == origin.stateName and transition.transitionChar == transition_char:
+                    list_to_return.append(transition.destinationState)
+            return list_to_return'''
+            return self.get_next_states(origin, transition_char, transition_list)
