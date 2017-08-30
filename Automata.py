@@ -1,5 +1,6 @@
 from State import State
 from Transition import Transition
+from PdaTransition import PdaTransition
 
 
 class Automata:
@@ -7,6 +8,7 @@ class Automata:
         self.transitionList = []
         self.stateList = []
         self.automataType = automata_type
+        self.stack = "z"
 
     def get_state(self, state_name):
         for state in self.stateList:
@@ -46,6 +48,25 @@ class Automata:
                     new_transition = Transition(origin_state, destination_state, transition_char)
                     self.transitionList.append(new_transition)
                     return True
+        return False
+
+    def create_pda_transition(self, origin, destination, pop, push):
+        origin_state = self.get_state(origin)
+        destination_state = self.get_state(destination)
+
+        if self.pda_transition_exists(origin, destination, pop, push):
+            print("Transition exists.")
+        else:
+
+
+    def pda_transition_exists(self, origin, destination, pop, push):
+        if not self.state_exists(origin) and self.state_exists(destination):
+            return False
+
+        for transition in self.transitionList:
+            if transition.originState.stateName == origin and transition.destinationState.stateName == destination and\
+                transition.pop == pop and transition.push == push:
+                return True
         return False
 
     def check_dfa_transition(self, state, transition_char):
@@ -267,14 +288,17 @@ class Automata:
                 if state_matrix[count_5][count_6] == "E":
                     pass
                 elif isinstance(state_matrix[count_6][0], State) and isinstance(state_matrix[0][count_5], State):
-                    print(state_matrix[count_6][0].stateName + ", " + state_matrix[0][count_5].stateName)
-
                     if state_matrix[count_6][0].accepted and state_matrix[0][count_5].accepted:
                         pass
                     elif state_matrix[count_6][0].accepted or state_matrix[0][count_5].accepted:
                         state_matrix[count_5][count_6] = "X"
                     else:
-                        self.compare_states(state_matrix[count_6][0], state_matrix[0][count_5])
+                        print(state_matrix[count_6][0].stateName + ", " + state_matrix[0][count_5].stateName)
+
+                        state_matrix[count_5][count_6] = "?"
+
+                        result = self.compare_states(state_matrix[count_6][0], state_matrix[0][count_5], state_matrix,
+                                                     count_5, count_6)
 
                 count_6 += 1
             count_5 += 1
@@ -291,15 +315,19 @@ class Automata:
                     string_data += y + ", "
             print(string_data)
 
-    def compare_states(self, state_a, state_b):
+    def compare_states(self, state_a, state_b, state_matrix, x, y):
         alphabet = self.get_alphabet()
 
-        next_state_a = []
-        next_state_b = []
+        equivalent = []
 
         for a in alphabet:
+
+            next_state_a = []
+            next_state_b = []
+
             for transition in self.transitionList:
                 if transition.originState.stateName == state_a.stateName and transition.transitionChar == a:
+
                     next_state_a.append(transition.destinationState)
 
             for transition_b in self.transitionList:
@@ -307,3 +335,35 @@ class Automata:
                     next_state_b.append(transition_b.destinationState)
 
 
+
+            count = 0
+            while count < len(next_state_a):
+
+                if next_state_a[count].stateName == next_state_b[count].stateName:
+                    state_matrix[x][y] = "O"
+                else:
+                    self.compare_states(next_state_a[count], next_state_b[count], state_matrix, )
+
+
+
+
+
+
+                print(next_state_a[count].stateName + ", " + next_state_b[count].stateName + ", " + a)
+
+                if next_state_a[count].stateName == next_state_b[count].stateName:
+                    if state_matrix[x][y] == "?":
+                        state_matrix[x][y] = "O"
+                        equivalent.append(True)
+
+                else:
+                    if state_matrix[x][y] == "?":
+                        state_matrix[x][y] = "O"
+                    elif state_matrix[x][y] == "n":
+                        state_matrix[x][y] = "?"
+                        self.print_matrix_state_matrix(state_matrix)
+                        equivalent.append(self.compare_states(next_state_a[count], next_state_b[count], state_matrix, x, y))
+                    else:
+                        state_matrix[x][y] = "X"
+
+                count += 1

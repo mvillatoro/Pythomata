@@ -91,6 +91,7 @@ def get_text_from_file(save_name):
 
 
 class GUI(Frame):
+
     """
     def __init__(self):
         # au = Automata("dfa")
@@ -106,6 +107,12 @@ class GUI(Frame):
         else:
             print("NO acepta")
 """
+    # ER->NFAE
+    # DFA->ER
+    # Resta
+    # Complemento
+    # Reflexion (regex)
+
     # DFA
     # NFA
     # NFA->DFA
@@ -114,22 +121,20 @@ class GUI(Frame):
     # Union
     # Interseccion
 
-    # ER->NFAE
-    # DFA->ER
-
-    # Resta
-    # Complemento
-    # Reflexion (regex)
+    # PDA
+    # Turing
 
     drawing_area = None
     operations_drawing_Area = None
     au = Automata("nfa")
-    oau = Automata("nfa")
+    pda = Automata("pda")
     state_nodes = []
     transition_edge = []
     edit_states = False
     automataType = None
     nfa_to_dfa_button = None
+
+    button_name = "Nfa"
 
     state_position = []
     record_state_position = False
@@ -145,7 +150,7 @@ class GUI(Frame):
         GUI.state_nodes.append(node_data(x, y, label_text, fill_color, text_id, oval_id))
 
     def init_ui(self):
-        self.master.title("Pythomatas")
+        self.master.title("Pythomatas: Nfa")
         self.pack(fill=BOTH, expand=1)
         self.center_window()
 
@@ -169,7 +174,7 @@ class GUI(Frame):
         state_pos = Button(self, text="State position", command=convert_nfa_to_dfa)
         state_pos.place(x=200, y=549)
 
-        dfa_to_regex_button = Button(self, text="TO REGEX", command=self.switch_automata)
+        dfa_to_regex_button = Button(self, text="Switch", command=self.switch_automata)
         dfa_to_regex_button.place(x=800, y=20)
 
         nfa_to_dfa_button = Button(self, text="To DFA", command=self.nfa_to_dfa)
@@ -199,8 +204,8 @@ class GUI(Frame):
         union_button = Button(self, text="Union", command=lambda: self.automata_operations("u"))
         union_button.place(x=800, y=130)
 
-        compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("c"))
-        compliment_button.place(x=800, y=160)
+        # compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("c"))
+        # compliment_button.place(x=800, y=160)
 
         reflexion_button = Button(self, text="Reflexion", command=lambda: self.automata_operations("r"))
         reflexion_button.place(x=800, y=190)
@@ -208,8 +213,8 @@ class GUI(Frame):
         intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("i"))
         intersection_button.place(x=880, y=130)
 
-        difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("d"))
-        difference_button.place(x=880, y=160)
+        # difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("d"))
+        # difference_button.place(x=880, y=160)
 
         minimize_button = Button(self, text="Minimize", command=self.minimize_automata)
         minimize_button.place(x=800, y=240)
@@ -217,12 +222,13 @@ class GUI(Frame):
     def automata_operations(self, operation):
         result = EvaluateAutomata().automata_operations(self.au, operation)
         self.clear_canvas(False)
+
         self.generate_text_automata(result)
 
     def minimize_automata(self):
         result = self.au.minimize()
-#         self.clear_canvas(False)
-#         self.generate_text_automata(result)
+        self.clear_canvas(False)
+        self.generate_text_automata(result)
 
     def show_new_area(self):
         t = Toplevel(self)
@@ -249,10 +255,21 @@ class GUI(Frame):
             else:
                 messagebox.showinfo("Result", "La cadena no fue aceptada")
 
-            # regex.split_parenthesis(regex_string)
+                # regex.split_parenthesis(regex_string)
 
-    def switch_automata(self, automata_type):
-        self.master.title("Pythomatas: " + automata_type)
+    def switch_automata(self):
+        if GUI.button_name == "Nfa":
+            GUI.button_name = "Pda"
+            self.master.title("Pythomatas: " + GUI.button_name)
+            self.clear_canvas(True)
+        elif GUI.button_name == "Pda":
+            GUI.button_name = "Turing"
+            self.master.title("Pythomatas: " + GUI.button_name)
+            self.clear_canvas(True)
+        elif GUI.button_name == "Turing":
+            GUI.button_name = "Nfa"
+            self.master.title("Pythomatas: " + GUI.button_name)
+            self.clear_canvas(True)
 
     def nfa_to_dfa(self):
         result = EvaluateAutomata().nfa_to_dfa(self.au)

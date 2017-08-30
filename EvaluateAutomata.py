@@ -153,6 +153,8 @@ class EvaluateAutomata:
     def automata_operations(self, automata, operation):
 
         if operation == "r":
+            print(self.reflexion_automtata(automata))
+
             return self.reflexion_automtata(automata)
         elif operation == "c":
             print("compliment")
@@ -181,6 +183,9 @@ class EvaluateAutomata:
 
     def reflexion_automtata(self, automata):
         text_automata = automata.save_automata("none", "n")
+
+        print(text_automata)
+
         i = 0
         for ta in text_automata:
             if ta == "I":
@@ -189,4 +194,22 @@ class EvaluateAutomata:
                 text_automata = text_automata[:i] + "I" + text_automata[i + 1:]
             i += 1
 
-        return text_automata
+        a = text_automata.split("*")
+        b = a[1].split("|")
+
+        x = a[0] + "*"
+
+        for c in b:
+            d = c.split(",")
+            e = d[0]
+            f = d[2]
+
+            val = f + "," + d[1] + "," + e
+
+            x += val + "|"
+
+        x = x[:-1]
+
+        print(x)
+
+        return x
