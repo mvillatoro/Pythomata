@@ -134,7 +134,7 @@ class GUI(Frame):
     automataType = None
     nfa_to_dfa_button = None
 
-    button_name = "Nfa"
+    automata_type = "Pda"
 
     state_position = []
     record_state_position = False
@@ -258,17 +258,17 @@ class GUI(Frame):
                 # regex.split_parenthesis(regex_string)
 
     def switch_automata(self):
-        if GUI.button_name == "Nfa":
-            GUI.button_name = "Pda"
-            self.master.title("Pythomatas: " + GUI.button_name)
+        if GUI.automata_type == "Nfa":
+            GUI.automata_type = "Pda"
+            self.master.title("Pythomatas: " + GUI.automata_type)
             self.clear_canvas(True)
-        elif GUI.button_name == "Pda":
-            GUI.button_name = "Turing"
-            self.master.title("Pythomatas: " + GUI.button_name)
+        elif GUI.automata_type == "Pda":
+            GUI.automata_type = "Turing"
+            self.master.title("Pythomatas: " + GUI.automata_type)
             self.clear_canvas(True)
-        elif GUI.button_name == "Turing":
-            GUI.button_name = "Nfa"
-            self.master.title("Pythomatas: " + GUI.button_name)
+        elif GUI.automata_type == "Turing":
+            GUI.automata_type = "Nfa"
+            self.master.title("Pythomatas: " + GUI.automata_type)
             self.clear_canvas(True)
 
     def nfa_to_dfa(self):
@@ -284,9 +284,14 @@ class GUI(Frame):
 
     def save_automata(self):
         file_name = askstring('File name', "")
+
         if file_name:
-            if self.au.save_automata(file_name, "y"):
-                messagebox.showinfo("Result", "El automata se salvo")
+            if GUI.automata_type == "Pda":
+                if self.au.save_pda_automata(file_name, "y"):
+                    messagebox.showinfo("Result", "El automata se salvo")
+            else:
+                if self.au.save_automata(file_name, "y"):
+                    messagebox.showinfo("Result", "El automata se salvo")
 
     def create_self_transition(self, transition_char, x, y, state, node_id):
 
@@ -318,7 +323,11 @@ class GUI(Frame):
             self.master.title("Pythomatas Edit*")
 
     def create_transition_aux(self):
-        transition_data = askstring('Insert Transition', "a,0,b")
+
+        if GUI.automata_type == "Pda":
+            transition_data = askstring('Insert Transition', "a,b,char,pop,push")
+        else:
+            transition_data = askstring('Insert Transition', "a,0,b")
 
         if transition_data:
             ntd = transition_data.split(",")
@@ -326,6 +335,11 @@ class GUI(Frame):
             if len(ntd) == 3:
                 if self.au.create_transition(ntd[0], ntd[2], ntd[1]):
                     self.draw_line(ntd[0], ntd[2], ntd[1])
+                else:
+                    messagebox.showinfo("Info", "La transision no se creo")
+            else:
+                if self.au.create_pda_transition(ntd[0], ntd[1], ntd[2], ntd[3], ntd[4]):
+                    self.draw_line(ntd[0], ntd[1], ntd[2] + "," + ntd[3] + "/" + ntd[4])
                 else:
                     messagebox.showinfo("Info", "La transision no se creo")
 
@@ -379,7 +393,10 @@ class GUI(Frame):
         # test_string = askstring('Insert test string', "")
 
         if test_string:
-            result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
+            if GUI.automata_type == "Pda":
+                result = EvaluateAutomata().evaluate_pda(test_string, self.au)
+            else:
+                result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 
             if result:
                 messagebox.showinfo("Result", "La cadena fue aceptada")
@@ -443,8 +460,12 @@ class GUI(Frame):
 
         for td in transition_division:
             ntd = td.split(",")
-            self.au.create_transition(ntd[0], ntd[2], ntd[1])
-            self.draw_line(ntd[0], ntd[2], ntd[1])
+            if GUI.automata_type == "Pda":
+                self.au.create_pda_transition(ntd[0], ntd[4], ntd[1], ntd[2], ntd[3])
+                self.draw_line(ntd[0], ntd[4], ntd[1] + "," + ntd[2] + "/" + ntd[3])
+            else:
+                self.au.create_transition(ntd[0], ntd[2], ntd[1])
+                self.draw_line(ntd[0], ntd[2], ntd[1])
 
     def get_mouse_data(event):
         if GUI.record_state_position:

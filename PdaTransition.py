@@ -1,7 +1,8 @@
 class PdaTransition:
 
-    def __init__(self, origin__state, destination_state, pop, push):
+    def __init__(self, origin__state, destination_state, transition_char, pop_char, push_char):
         self.originState = origin__state
         self.destinationState = destination_state
-        self.pop = pop
-        self.push = push
+        self.transition_char = transition_char
+        self.pop_char = pop_char
+        self.push_char = push_char

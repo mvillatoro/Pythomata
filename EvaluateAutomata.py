@@ -213,3 +213,44 @@ class EvaluateAutomata:
         print(x)
 
         return x
+
+    def evaluate_pda(self, test_string, automata):
+
+        automata_stack = ["z"]
+
+        pop_char = automata_stack[len(automata_stack)-1]
+
+        test_char = test_string[len(test_string)-1]
+        new_test_string = test_string[0:len(test_string)-1]
+
+        init_states = [automata.get_initial_nodes()]
+        self.pda_transition_function(self.pda_extended_transition_function(init_states, new_test_string, automata), test_char, pop_char,automata)
+
+    def pda_transition_function(self, states, test_char, pop_char, automata):
+
+        next_states = []
+
+        for state in states:
+            new_state = automata.get_next_pda_states(state, test_char, pop_char)
+
+            next_states.append(new_state)
+
+        return next_states
+
+    def pda_extended_transition_function(self, states, test_string, pop_char, automata):
+        test_char = test_string[len(test_string) - 1]
+        new_test_string = test_string[0:len(test_string) - 1]
+
+        if len(test_string) == 1:
+            return self.pda_transition_function(states[0], test_char, pop_char,automata)
+        else:
+            return self.pda_transition_function(self.pda_extended_transition_function(states, new_test_string, pop_char, automata), test_char, pop_char, automata)
+
+
+
+
+
+
+
+
+

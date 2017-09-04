@@ -8,7 +8,6 @@ class Automata:
         self.transitionList = []
         self.stateList = []
         self.automataType = automata_type
-        self.stack = "z"
 
     def get_state(self, state_name):
         for state in self.stateList:
@@ -36,6 +35,7 @@ class Automata:
 
         if self.transition_exists(origin, destination, transition_char):
             print("Transition already exists.")
+            return False
         else:
             if self.automataType == "nfa" or self.automataType == "nfae":
                 new_transition = Transition(origin_state, destination_state, transition_char)
@@ -48,24 +48,29 @@ class Automata:
                     new_transition = Transition(origin_state, destination_state, transition_char)
                     self.transitionList.append(new_transition)
                     return True
-        return False
 
-    def create_pda_transition(self, origin, destination, pop, push):
+    def create_pda_transition(self, origin, destination, transition_char, pop_char, push_char):
         origin_state = self.get_state(origin)
         destination_state = self.get_state(destination)
 
-        if self.pda_transition_exists(origin, destination, pop, push):
+        if self.pda_transition_exists(origin, destination, transition_char, pop_char, push_char):
             print("Transition exists.")
+            return False
         else:
+            new_pda_transition = PdaTransition(origin_state, destination_state, transition_char, pop_char, push_char)
+            self.transitionList.append(new_pda_transition)
+            return True
 
-
-    def pda_transition_exists(self, origin, destination, pop, push):
+    def pda_transition_exists(self, origin, destination, transition_char, pop, push):
         if not self.state_exists(origin) and self.state_exists(destination):
             return False
 
         for transition in self.transitionList:
-            if transition.originState.stateName == origin and transition.destinationState.stateName == destination and\
-                transition.pop == pop and transition.push == push:
+            if transition.originState.stateName == origin and\
+                            transition.destinationState.stateName == destination and\
+                            transition.transition_char == transition_char and\
+                            transition.pop_char == pop and\
+                            transition.push_char == push:
                 return True
         return False
 
@@ -171,6 +176,47 @@ class Automata:
                 transitions.append(transition)
 
         return transitions
+
+    def save_pda_automata(self,save_name,op):
+        state_string = ""
+
+        if len(self.stateList) == 0:
+            return False
+
+        for state in self.stateList:
+            string_builder = state.stateName + ","
+            if state.isInitial and state.accepted:
+                string_builder = string_builder + "IF"
+            elif state.isInitial and not state.accepted:
+                string_builder = string_builder + "I"
+            if not state.isInitial and not state.accepted:
+                string_builder = string_builder + "N"
+            if not state.isInitial and state.accepted:
+                string_builder = string_builder + "F"
+            string_builder = string_builder + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+        state_string = state_string + "*"
+
+        for transition in self.transitionList:
+            string_builder = transition.originState.stateName + "," +\
+                             transition.test_char + "," +\
+                             transition.pop_char + "," + \
+                             transition.push_char + "," +\
+                             transition.destinationState.stateName + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+
+        if op == "y":
+            f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".ptm", "w+")
+            f.write(state_string)
+            return True
+        else:
+            return state_string
 
     def save_automata(self, save_name, op):
         state_string = ""
@@ -367,3 +413,18 @@ class Automata:
                         state_matrix[x][y] = "X"
 
                 count += 1
+
+    def get_next_pda_states(self, state, transition_char, pop_char):
+        next_state_list = []
+
+        for transition in self.transitionList:
+            if state.stateName == transition.originState.stateName and\
+                    (transition_char == transition.transition_char or\
+                     transition_char == "e")and \
+                    pop_char == transition.pop_char:
+
+                input_char_reversed = transition.push_char[::-1]
+                return_data = [transition.destinationState, input_char_reversed]
+                next_state_list.append(return_data)
+
+        return next_state_list
