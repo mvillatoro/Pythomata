@@ -161,6 +161,9 @@ class Automata:
 
             i += 1
 
+    def delete_pda_transition(self, origin_name, destiny_name, transition_char, pop_char, push_char):
+        pass
+
     def get_alphabet(self):
         alphabet = []
         for transition in self.transitionList:
@@ -202,7 +205,7 @@ class Automata:
 
         for transition in self.transitionList:
             string_builder = transition.originState.stateName + "," +\
-                             transition.test_char + "," +\
+                             transition.transition_char + "," +\
                              transition.pop_char + "," + \
                              transition.push_char + "," +\
                              transition.destinationState.stateName + "|"

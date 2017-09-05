@@ -135,9 +135,11 @@ class GUI(Frame):
     nfa_to_dfa_button = None
 
     automata_type = "Pda"
-
+    shown_transitions = ""
     state_position = []
     record_state_position = False
+
+
 
     def __init__(self):
         super().__init__()
@@ -150,7 +152,7 @@ class GUI(Frame):
         GUI.state_nodes.append(node_data(x, y, label_text, fill_color, text_id, oval_id))
 
     def init_ui(self):
-        self.master.title("Pythomatas: Nfa")
+        self.master.title("Pythomatas: Pfa")
         self.pack(fill=BOTH, expand=1)
         self.center_window()
 
@@ -198,8 +200,8 @@ class GUI(Frame):
         # test_regex_button = Button(self, text="Test Regex", command=lambda: self.test_regex(regex_input.get()))
         # test_regex_button.place(x=800, y=140)
 
-        # show_new_drawing_area_button = Button(self, text="Draw new Automata", command=self.show_new_area)
-        # show_new_drawing_area_button.place(x=800, y=200)
+        show_new_drawing_area_button = Button(self, text="Show PDA transitions", command=self.show_new_area)
+        show_new_drawing_area_button.place(x=800, y=400)
 
         union_button = Button(self, text="Union", command=lambda: self.automata_operations("u"))
         union_button.place(x=800, y=130)
@@ -235,11 +237,14 @@ class GUI(Frame):
         t.geometry('%dx%d+%d+%d' % (760, 520, 480, 250))
         t.wm_title("Drawing Area")
 
-        new_button = Button(t, text="Draw new Automata", command=self.show_new_area)
-        new_button.place(x=630, y=480)
+        #GUI.operations_drawing_Area = Canvas(t, bg="#cccccc", height=450, width=730)
+        #GUI.operations_drawing_Area.place(x=10, y=10)
 
-        GUI.operations_drawing_Area = Canvas(t, bg="#cccccc", height=450, width=730)
-        GUI.operations_drawing_Area.place(x=10, y=10)
+        x = 1
+        y = 1
+
+        for x in GUI.shown_transitions:
+            print(x)
 
     def test_regex(self, regex_string):
 
@@ -394,7 +399,7 @@ class GUI(Frame):
 
         if test_string:
             if GUI.automata_type == "Pda":
-                result = EvaluateAutomata().evaluate_pda(test_string, self.au)
+                result = False #EvaluateAutomata().evaluate_pda(test_string, self.au)
             else:
                 result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 
@@ -429,14 +434,21 @@ class GUI(Frame):
                 for sn in GUI.state_nodes:
                     if sn.type == "edge":
                         if sn.node_origin == item[0] or sn.node_destiny == item[0]:
-                            GUI.drawing_area.delete(sn.char_id)
+                            # GUI.drawing_area.delete(sn.char_id)
                             GUI.drawing_area.delete(sn.edge_id)
 
             if object_type == "edge":
-                GUI.au.delete_transition(state_name, element1, element2)
-                GUI.drawing_area.delete(c_id)
-                GUI.drawing_area.delete(e_id)
-                del GUI.state_nodes[i]
+
+                if GUI.automata_type == "pda":
+                    GUI.au.delete_pda_transition(state_name, element1, element2)
+                    GUI.drawing_area.delete(c_id)
+                    GUI.drawing_area.delete(e_id)
+                    del GUI.state_nodes[i]
+                else:
+                    GUI.au.delete_transition(state_name, element1, element2)
+                    GUI.drawing_area.delete(c_id)
+                    GUI.drawing_area.delete(e_id)
+                    del GUI.state_nodes[i]
 
     def center_window(self):
         w = 1000
@@ -452,6 +464,8 @@ class GUI(Frame):
         state_transition_division = automata_text.split("*")
         states_division = state_transition_division[0].split("|")
         transition_division = state_transition_division[1].split("|")
+
+        GUI.shown_transitions = transition_division
 
         i = 0
         for sd in states_division:
@@ -472,13 +486,16 @@ class GUI(Frame):
             GUI.global_x = event.x
             GUI.global_y = event.y
             GUI.state_position.append([GUI.global_x, GUI.global_y])
-            print(GUI.global_x, GUI.global_y)
+            #print(GUI.global_x, GUI.global_y)
+
+    def test_event_state(event):
+        messagebox.showinfo("Result", "La cadena fue aceptada")
 
     def clear_canvas(self, full_clear):
 
         self.drawing_area.delete(ALL)
         GUI.state_nodes = []
-        GUI.au = Automata("nfa")
+        GUI.au = Automata("Pfa")
         GUI.transition_edge = []
 
         if full_clear:
@@ -493,8 +510,8 @@ def main():
     app = GUI()
     GUI.drawing_area.bind("<Double-Button-1>", GUI.canvas_operations)
     GUI.drawing_area.bind("<Button-1>", GUI.get_mouse_data, GUI.drawing_area)
+    root.bind("<Button-3>", GUI.test_event_state)
 
-    # root.bind("<B1-Motion>", GUI.move_node)
     root.mainloop()
 
 

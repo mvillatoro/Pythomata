@@ -218,39 +218,61 @@ class EvaluateAutomata:
 
         automata_stack = ["z"]
 
-        pop_char = automata_stack[len(automata_stack)-1]
-
-        test_char = test_string[len(test_string)-1]
-        new_test_string = test_string[0:len(test_string)-1]
-
         init_states = [automata.get_initial_nodes()]
-        self.pda_transition_function(self.pda_extended_transition_function(init_states, new_test_string, automata), test_char, pop_char,automata)
 
-    def pda_transition_function(self, states, test_char, pop_char, automata):
+        r_states = self.pda_extended_transition_function(init_states, test_string, automata_stack, automata)
+
+        for rs in r_states:
+            for rs2 in rs:
+                if rs2.accepted and automata_stack[len(automata_stack)-1] == "z":
+                    return True
+
+        return False
+
+    def pda_transition_function(self, states, test_char, automata_stack, automata):
+
+        r_stack = []
+
+        for data in automata_stack:
+            r_stack.append(data)
+
+        pop_char = r_stack.pop(len(automata_stack)-1)
 
         next_states = []
 
         for state in states:
             new_state = automata.get_next_pda_states(state, test_char, pop_char)
-
             next_states.append(new_state)
-
+        i = 0
+        j = 0
+        for ns in next_states:
+            for ns2 in ns:
+                new_stack = []
+                for stk in r_stack:
+                    new_stack.append(stk)
+                for d in ns2[1]:
+                    new_stack.append(d)
+                next_states[i][j].append(new_stack)
+                j += 1
+            i += 1
         return next_states
 
-    def pda_extended_transition_function(self, states, test_string, pop_char, automata):
-        test_char = test_string[len(test_string) - 1]
+    def pda_extended_transition_function(self, states, test_string, automata_stack, automata):
+        test_char = test_string[len(test_string)-1]
         new_test_string = test_string[0:len(test_string) - 1]
 
+        test_states = []
+
         if len(test_string) == 1:
-            return self.pda_transition_function(states[0], test_char, pop_char,automata)
+            ts = self.pda_transition_function(states[0], test_char, automata_stack, automata)
+
+            for ts2 in ts:
+                for ts3 in ts2:
+                    print(ts3[0].stateName)
+
         else:
-            return self.pda_transition_function(self.pda_extended_transition_function(states, new_test_string, pop_char, automata), test_char, pop_char, automata)
+            r_states = self.pda_extended_transition_function(states, new_test_string, automata_stack, automata)
 
+            return self.pda_transition_function(r_states[0], test_char, automata_stack, automata)
 
-
-
-
-
-
-
-
+        return test_states
