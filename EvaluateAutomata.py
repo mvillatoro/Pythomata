@@ -276,3 +276,37 @@ class EvaluateAutomata:
             return self.pda_transition_function(r_states[0], test_char, automata_stack, automata)
 
         return test_states
+
+    def pda_to_glc(self, automata):
+
+        glc_string_builder = ""
+
+        final_states = automata.get_final_nodes()
+        initial_state = automata.get_initial_node()
+
+        #Paso 1
+        for fs in final_states:
+            if len(glc_string_builder) == 0:
+                glc_string_builder += " S → [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+            else:
+                glc_string_builder += "    |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+
+        glc_string_builder += "\n"
+
+        #paso 2
+        for transition in automata.transitionList:
+            if transition.push_char == "e":
+                glc_string_builder += "[ " + transition.originState.stateName + " " + transition.pop_char + " " +\
+                                      transition.destinationState.stateName + "] → " + transition.transition_char + "\n"
+
+        glc_string_builder += "\n"
+
+        #Paso 3 tan tan taaaaaan...
+
+        for transition in automata.transitionList:
+            if transition.push_char != "e":
+                
+
+
+
+        return glc_string_builder

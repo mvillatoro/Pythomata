@@ -105,6 +105,13 @@ class Automata:
             if state.isInitial:
                 return state
 
+    def get_final_nodes(self):
+        final_nodes = []
+        for state in self.stateList:
+            if state.accepted:
+                final_nodes.append(state)
+        return final_nodes
+
     def get_initial_nodes(self):
         initial_nodes = []
         for state in self.stateList:

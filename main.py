@@ -218,8 +218,14 @@ class GUI(Frame):
         # difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("d"))
         # difference_button.place(x=880, y=160)
 
-        minimize_button = Button(self, text="Minimize", command=self.minimize_automata)
+        minimize_button = Button(self, text="Pda to GLC", command=self.pda_to_glc)
         minimize_button.place(x=800, y=240)
+
+    def pda_to_glc(self):
+        result = EvaluateAutomata().pda_to_glc(self.au)
+        self.clear_canvas(False)
+        print(result)
+        # self.generate_text_automata(result)
 
     def automata_operations(self, operation):
         result = EvaluateAutomata().automata_operations(self.au, operation)
