@@ -200,7 +200,7 @@ class GUI(Frame):
         # test_regex_button = Button(self, text="Test Regex", command=lambda: self.test_regex(regex_input.get()))
         # test_regex_button.place(x=800, y=140)
 
-        show_new_drawing_area_button = Button(self, text="Show PDA transitions", command=self.show_new_area)
+        show_new_drawing_area_button = Button(self, text="Show PDA Data", command=self.show_new_area)
         show_new_drawing_area_button.place(x=800, y=400)
 
         union_button = Button(self, text="Union", command=lambda: self.automata_operations("u"))
@@ -224,6 +224,7 @@ class GUI(Frame):
     def pda_to_glc(self):
         result = EvaluateAutomata().pda_to_glc(self.au)
         self.clear_canvas(False)
+        GUI.shown_transitions = result
         print(result)
         # self.generate_text_automata(result)
 
@@ -241,16 +242,14 @@ class GUI(Frame):
     def show_new_area(self):
         t = Toplevel(self)
         t.geometry('%dx%d+%d+%d' % (760, 520, 480, 250))
-        t.wm_title("Drawing Area")
+        t.wm_title("Data")
 
-        #GUI.operations_drawing_Area = Canvas(t, bg="#cccccc", height=450, width=730)
-        #GUI.operations_drawing_Area.place(x=10, y=10)
+        GUI.operations_drawing_Area = Text(t, bg="#cccccc", height=30, width=90)
+        GUI.operations_drawing_Area.place(x=10, y=10)
+        GUI.operations_drawing_Area.insert(END, GUI.shown_transitions)
 
-        x = 1
-        y = 1
-
-        for x in GUI.shown_transitions:
-            print(x)
+        #for x in GUI.shown_transitions:
+        #    print(x)
 
     def test_regex(self, regex_string):
 

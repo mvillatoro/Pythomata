@@ -1,7 +1,8 @@
+import itertools
+
 from AutomataActions import AutomataActions
 from Automata import Automata
 from Transition import Transition
-
 
 class EvaluateAutomata:
     def evaluate_dfa(self, test_string, automata):
@@ -290,23 +291,48 @@ class EvaluateAutomata:
                 glc_string_builder += " S → [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
             else:
                 glc_string_builder += "    |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
-
-        glc_string_builder += "\n"
-
         #paso 2
         for transition in automata.transitionList:
             if transition.push_char == "e":
                 glc_string_builder += "[ " + transition.originState.stateName + " " + transition.pop_char + " " +\
                                       transition.destinationState.stateName + "] → " + transition.transition_char + "\n"
-
-        glc_string_builder += "\n"
-
         #Paso 3 tan tan taaaaaan...
-
         for transition in automata.transitionList:
             if transition.push_char != "e":
-                
+                push_string_array = []
+                for tp in transition.push_char:
+                    push_string_array.append(tp)
+                super_tabla = self.create_super_tabla(automata.stateList, len(push_string_array))
 
-
+                if len(push_string_array) == 1:
+                    for st in super_tabla:
+                        glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
+                                              st[len(st)-1] + "] → " + transition.transition_char + "[" + \
+                                              st[0] + " " + push_string_array[0] + \
+                                              " " + st[0] + "]\n"
+                else:
+                    for st in super_tabla:
+                        glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
+                                              st[len(st) - 1] + "] → " + transition.transition_char + "[" + \
+                                              transition.originState.stateName + " " + push_string_array[0] + " " + \
+                                              st[0] + "]" + self.satanic_function(st, push_string_array[1:])
 
         return glc_string_builder
+
+    def satanic_function(self, super_row, push_list):
+        string_builder = ""
+
+        i = 0
+        for pl in push_list:
+            string_builder += "[" + super_row[i] + " " + pl + " " + super_row[i+1] + "]"
+            i += 1
+
+        string_builder += "\n"
+
+        return string_builder
+
+    def create_super_tabla(self, state_list, k_size):
+        states_name_list = []
+        for state in state_list:
+            states_name_list.append(state.stateName)
+        return itertools.product(states_name_list, repeat=k_size)
