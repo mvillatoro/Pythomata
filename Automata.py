@@ -438,3 +438,15 @@ class Automata:
                 next_state_list.append(return_data)
 
         return next_state_list
+
+    def get_pda_transitions(self):
+        string_builder = ""
+
+        for transition in self.transitionList:
+            string_builder += "δ(" + transition.originState.stateName + ", "
+            string_builder += transition.transition_char + ", "
+            string_builder += transition.pop_char + ") = ("
+            string_builder += transition.destinationState.stateName + ", "
+            string_builder += transition.push_char + ")\n"
+
+        return string_builder

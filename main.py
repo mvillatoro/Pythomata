@@ -205,19 +205,20 @@ class GUI(Frame):
         intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("i"))
         intersection_button.place(x=880, y=130)
 
-        show_new_drawing_area_button = Button(self, text="Show PDA Data", command=self.show_new_area)
+        show_new_drawing_area_button = Button(self, text="Show PDA Data", command=lambda: self.show_new_area(True))
         show_new_drawing_area_button.place(x=800, y=410)
 
         pda_to_glc = Button(self, text="PDA to GLC", command=self.pda_to_glc)
         pda_to_glc.place(x=800, y=350)
 
-        glc_to_pda = Button(self, text="GLC to PDA", command=self.pda_to_glc)
+        glc_to_pda = Button(self, text="GLC to PDA", command=lambda: self.show_new_area(False))
         glc_to_pda.place(x=800, y=380)
 
     def pda_to_glc(self):
         result = EvaluateAutomata().pda_to_glc(self.au)
-        GUI.shown_transitions = result
-        self.show_new_area()
+        if result:
+            GUI.shown_transitions = result
+            self.show_new_area(True)
 
     def automata_operations(self, operation):
         result = EvaluateAutomata().automata_operations(self.au, operation)
@@ -230,22 +231,38 @@ class GUI(Frame):
         self.clear_canvas(False)
         self.generate_text_automata(result)
 
-    def show_new_area(self):
+    def show_new_area(self, data):
         t = Toplevel(self)
         t.geometry('%dx%d+%d+%d' % (760, 520, 480, 250))
         t.wm_title("Data")
 
         text_area = Text(t, bg="#cccccc", height=29, width=90)
         text_area.place(x=10, y=10)
-        text_area.insert(END, GUI.shown_transitions)
 
-        save_text_button = Button(t, text="Generate PDA", command=lambda: self.save_glc(text_area.get("1.0", END)))
-        save_text_button.place(x=645, y=480)
+        if not data:
+            save_text_button = Button(t, text="Create PDA", command=lambda: self.glc_to_pda(text_area.get("1.0", END)))
+            save_text_button.place(x=645, y=480)
+            load_glc_button = Button(t, text="Load GLC", command=self.load_glc)
+            load_glc_button.place(x=545, y=480)
+        else:
+            text_area.insert(END, GUI.au.get_pda_transitions())
 
-    def save_glc(self, glc_data):
-        result  = EvaluateAutomata().glc_to_pda(glc_data)
-        self.clear_canvas(False)
+        save_glc_button = Button(t, text="Save GLC", command=lambda: self.save_glc(text_area.get("1.0", END)))
+        save_glc_button.place(x=450, y=480)
+
+    def glc_to_pda(self, glc_data):
+        result = EvaluateAutomata().glc_to_pda(glc_data)
+        self.clear_canvas(True)
+        GUI.state_position.append([150, 300])
+        GUI.state_position.append([400, 300])
+        GUI.state_position.append([650, 300])
         self.generate_text_automata(result)
+
+    def load_glc(self):
+        glc_text = askopenfilename()
+        if glc_text:
+            automata_text = get_text_from_file(glc_text)
+            self.glc_to_pda(automata_text)
 
     def test_regex(self, regex_string):
 
@@ -286,7 +303,6 @@ class GUI(Frame):
         result = EvaluateAutomata().nfae_to_dfa(self.au)
         self.clear_canvas(False)
         self.generate_text_automata(result)
-        # self.print_states_transitions()
 
     def save_automata(self):
         file_name = askstring('File name', "")
@@ -314,11 +330,16 @@ class GUI(Frame):
                                           edge_right_id, state, state))
 
     def load_automata(self):
-
         f_name = askopenfilename()
         if f_name:
             automata_text = get_text_from_file(f_name)
             self.generate_text_automata(automata_text)
+
+    def save_glc(self, glc_text):
+        file_name = askstring('File name', "")
+
+        if file_name:
+            EvaluateAutomata().save_glc(file_name, glc_text)
 
     def change_edit_state(self):
         if GUI.edit_states:
@@ -487,7 +508,6 @@ class GUI(Frame):
             GUI.global_x = event.x
             GUI.global_y = event.y
             GUI.state_position.append([GUI.global_x, GUI.global_y])
-            #print(GUI.global_x, GUI.global_y)
 
     def test_event_state(event):
         messagebox.showinfo("Result", "La cadena fue aceptada")

@@ -97,7 +97,7 @@ class AutomataActions:
                 return state
         return None
 
-    def transformation_save_automata(self, state_list, transition_list):
+    def transformation_save_automata(self, state_list, transition_list, automata_type):
         state_string = ""
 
         if len(state_list) == 0:
@@ -120,11 +120,19 @@ class AutomataActions:
         state_string = state_string[:-1]
         state_string = state_string + "*"
 
-        for transition in transition_list:
-            string_builder = transition.originState.stateName + "," + transition.transitionChar + "," + \
-                             transition.destinationState.stateName + "|"
-
-            state_string = state_string + string_builder
+        if automata_type != "PDA":
+            for transition in transition_list:
+                string_builder = transition.originState.stateName + "," + transition.transitionChar + "," + \
+                                 transition.destinationState.stateName + "|"
+                state_string = state_string + string_builder
+        else:
+            for transition in transition_list:
+                string_builder = transition.originState.stateName + "," + \
+                                 transition.transition_char + "," + \
+                                 transition.pop_char + "," + \
+                                 transition.push_char + "," + \
+                                 transition.destinationState.stateName + "|"
+                state_string = state_string + string_builder
 
         state_string = state_string[:-1]
 
@@ -156,3 +164,13 @@ class AutomataActions:
                     list_to_return.append(transition.destinationState)
             return list_to_return'''
             return self.get_next_states(origin, transition_char, transition_list)
+
+    def get_terminals(self, glc_data):
+        terminals = []
+        lowers = [l for l in glc_data if l.islower()]
+
+        for l in lowers:
+            if l not in terminals:
+                terminals.append(l)
+
+        return terminals

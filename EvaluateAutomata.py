@@ -1,8 +1,9 @@
 import itertools
 
 from AutomataActions import AutomataActions
-from Automata import Automata
 from Transition import Transition
+from PdaTransition import PdaTransition
+from State import State
 
 class EvaluateAutomata:
     def evaluate_dfa(self, test_string, automata):
@@ -60,7 +61,7 @@ class EvaluateAutomata:
                 if not self.check_dfa_transition_in_automata(ns, s, new_transitions):
                     new_transitions.append(Transition(ns, state, s))
 
-        return AutomataActions().transformation_save_automata(new_states, new_transitions)
+        return AutomataActions().transformation_save_automata(new_states, new_transitions, "NFA")
 
     def evaluate_nfa_e(self, test_string, automata):
 
@@ -149,7 +150,7 @@ class EvaluateAutomata:
                 if not self.check_dfa_transition_in_automata(ns, s, new_transitions):
                     new_transitions.append(Transition(ns, combined_states, s))
 
-        return AutomataActions().transformation_save_automata(new_states, new_transitions)
+        return AutomataActions().transformation_save_automata(new_states, new_transitions, "NFA")
 
     def automata_operations(self, automata, operation):
 
@@ -180,7 +181,7 @@ class EvaluateAutomata:
                 if not self.check_dfa_transition_in_automata(cn, a, new_transitions):
                     new_transitions.append(Transition(cn, states, a))
 
-        return AutomataActions().transformation_save_automata(current_states, new_transitions)
+        return AutomataActions().transformation_save_automata(current_states, new_transitions, "NFA")
 
     def reflexion_automtata(self, automata):
         text_automata = automata.save_automata("none", "n")
@@ -288,14 +289,14 @@ class EvaluateAutomata:
         #Paso 1
         for fs in final_states:
             if len(glc_string_builder) == 0:
-                glc_string_builder += "S → [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+                glc_string_builder += "S -> [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
             else:
                 glc_string_builder += "   |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
         #paso 2
         for transition in automata.transitionList:
             if transition.push_char == "e":
                 glc_string_builder += "[ " + transition.originState.stateName + " " + transition.pop_char + " " +\
-                                      transition.destinationState.stateName + "] → " + transition.transition_char + "\n"
+                                      transition.destinationState.stateName + "] -> " + transition.transition_char + "\n"
         #Paso 3 tan tan taaaaaan...
         for transition in automata.transitionList:
             if transition.push_char != "e":
@@ -307,13 +308,13 @@ class EvaluateAutomata:
                 if len(push_string_array) == 1:
                     for st in super_tabla:
                         glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
-                                              st[len(st)-1] + "] → " + transition.transition_char + "[" + \
+                                              st[len(st)-1] + "] -> " + transition.transition_char + "[" + \
                                               st[0] + " " + push_string_array[0] + \
                                               " " + st[0] + "]\n"
                 else:
                     for st in super_tabla:
                         glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
-                                              st[len(st) - 1] + "] → " + transition.transition_char + "[" + \
+                                              st[len(st) - 1] + "] -> " + transition.transition_char + "[" + \
                                               transition.originState.stateName + " " + push_string_array[0] + " " + \
                                               st[0] + "]" + self.satanic_function(st, push_string_array[1:])
 
@@ -337,5 +338,27 @@ class EvaluateAutomata:
             states_name_list.append(state.stateName)
         return itertools.product(states_name_list, repeat=k_size)
 
+    def save_glc(self, save_name, text):
+        f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".txt", "w+")
+        f.write(text)
+
     def glc_to_pda(self, glc_data):
-        pass
+        productions = glc_data.split("\n")
+        terminals = AutomataActions().get_terminals(glc_data)
+
+        print(terminals)
+
+        init_state = State("A", True, True)
+        state_list = [init_state]
+        transition_list = []
+
+        for p in productions:
+            prod = p.split("-")
+            transition_list.append(PdaTransition(init_state, init_state, "e", prod[0], prod[1]))
+
+        for t in terminals:
+            transition_list.append(PdaTransition(init_state, init_state, t, t, "e"))
+
+        # origin__state, destination_state, transition_char, pop_char, push_char
+
+        return AutomataActions().transformation_save_automata(state_list, transition_list, "PDA")
