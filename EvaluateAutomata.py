@@ -288,9 +288,9 @@ class EvaluateAutomata:
         #Paso 1
         for fs in final_states:
             if len(glc_string_builder) == 0:
-                glc_string_builder += " S → [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+                glc_string_builder += "S → [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
             else:
-                glc_string_builder += "    |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+                glc_string_builder += "   |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
         #paso 2
         for transition in automata.transitionList:
             if transition.push_char == "e":
@@ -336,3 +336,6 @@ class EvaluateAutomata:
         for state in state_list:
             states_name_list.append(state.stateName)
         return itertools.product(states_name_list, repeat=k_size)
+
+    def glc_to_pda(self, glc_data):
+        pass

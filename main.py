@@ -125,7 +125,6 @@ class GUI(Frame):
     # Turing
 
     drawing_area = None
-    operations_drawing_Area = None
     au = Automata("nfa")
     pda = Automata("pda")
     state_nodes = []
@@ -194,39 +193,31 @@ class GUI(Frame):
         clear_all_button = Button(self, text="Clear", command=lambda: self.clear_canvas(True))
         clear_all_button.place(x=800, y=460)
 
-        # regex_input = Entry(self, width=30)
-        # regex_input.place(x=800, y=110)
-
-        # test_regex_button = Button(self, text="Test Regex", command=lambda: self.test_regex(regex_input.get()))
-        # test_regex_button.place(x=800, y=140)
-
-        show_new_drawing_area_button = Button(self, text="Show PDA Data", command=self.show_new_area)
-        show_new_drawing_area_button.place(x=800, y=400)
-
         union_button = Button(self, text="Union", command=lambda: self.automata_operations("u"))
         union_button.place(x=800, y=130)
 
-        # compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("c"))
-        # compliment_button.place(x=800, y=160)
+        compliment_button = Button(self, text="Compliment", command=lambda: self.automata_operations("c"))
+        compliment_button.place(x=880, y=160)
 
         reflexion_button = Button(self, text="Reflexion", command=lambda: self.automata_operations("r"))
-        reflexion_button.place(x=800, y=190)
+        reflexion_button.place(x=800, y=160)
 
         intersection_button = Button(self, text="Intersection", command=lambda: self.automata_operations("i"))
         intersection_button.place(x=880, y=130)
 
-        # difference_button = Button(self, text="Difference", command=lambda: self.automata_operations("d"))
-        # difference_button.place(x=880, y=160)
+        show_new_drawing_area_button = Button(self, text="Show PDA Data", command=self.show_new_area)
+        show_new_drawing_area_button.place(x=800, y=410)
 
-        minimize_button = Button(self, text="Pda to GLC", command=self.pda_to_glc)
-        minimize_button.place(x=800, y=240)
+        pda_to_glc = Button(self, text="PDA to GLC", command=self.pda_to_glc)
+        pda_to_glc.place(x=800, y=350)
+
+        glc_to_pda = Button(self, text="GLC to PDA", command=self.pda_to_glc)
+        glc_to_pda.place(x=800, y=380)
 
     def pda_to_glc(self):
         result = EvaluateAutomata().pda_to_glc(self.au)
-        self.clear_canvas(False)
         GUI.shown_transitions = result
-        print(result)
-        # self.generate_text_automata(result)
+        self.show_new_area()
 
     def automata_operations(self, operation):
         result = EvaluateAutomata().automata_operations(self.au, operation)
@@ -244,12 +235,17 @@ class GUI(Frame):
         t.geometry('%dx%d+%d+%d' % (760, 520, 480, 250))
         t.wm_title("Data")
 
-        GUI.operations_drawing_Area = Text(t, bg="#cccccc", height=30, width=90)
-        GUI.operations_drawing_Area.place(x=10, y=10)
-        GUI.operations_drawing_Area.insert(END, GUI.shown_transitions)
+        text_area = Text(t, bg="#cccccc", height=29, width=90)
+        text_area.place(x=10, y=10)
+        text_area.insert(END, GUI.shown_transitions)
 
-        #for x in GUI.shown_transitions:
-        #    print(x)
+        save_text_button = Button(t, text="Generate PDA", command=lambda: self.save_glc(text_area.get("1.0", END)))
+        save_text_button.place(x=645, y=480)
+
+    def save_glc(self, glc_data):
+        result  = EvaluateAutomata().glc_to_pda(glc_data)
+        self.clear_canvas(False)
+        self.generate_text_automata(result)
 
     def test_regex(self, regex_string):
 
