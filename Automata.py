@@ -429,8 +429,8 @@ class Automata:
 
         for transition in self.transitionList:
             if state.stateName == transition.originState.stateName and\
-                    (transition_char == transition.transition_char or\
-                     transition_char == "e")and \
+                    (transition_char == transition.transition_char or
+                        transition_char == "e")and \
                     pop_char == transition.pop_char:
 
                 input_char_reversed = transition.push_char[::-1]

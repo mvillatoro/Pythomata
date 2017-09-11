@@ -139,8 +139,6 @@ class GUI(Frame):
     state_position = []
     record_state_position = False
 
-
-
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -434,11 +432,10 @@ class GUI(Frame):
                     return sn.x_pos, sn.y_pos, sn.node_id
 
     def test_string_fun(self, test_string):
-        # test_string = askstring('Insert test string', "")
 
         if test_string:
             if GUI.automata_type == "Pda":
-                result = False #EvaluateAutomata().evaluate_pda(test_string, self.au)
+                result = EvaluateAutomata().evaluate_pda(test_string, self.au)
             else:
                 result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 

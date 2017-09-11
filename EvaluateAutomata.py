@@ -220,53 +220,66 @@ class EvaluateAutomata:
 
         automata_stack = ["z"]
 
-        init_states = [automata.get_initial_nodes()]
+        init_states = automata.get_initial_nodes()
 
-        r_states = self.pda_extended_transition_function(init_states, test_string, automata_stack, automata)
+        result = self.pda_transition_function(init_states, test_string, automata_stack, automata)
 
-        return r_states
+        return result
 
-    def pda_transition_function(self, states, test_char, automata_stack, automata):
+    def pda_transition_function(self, states, test_string, automata_stack, automata):
+        test_char = test_string[0]
+        new_test_string = test_string[1:]
 
-        r_stack = []
-
-        for data in automata_stack:
-            r_stack.append(data)
-
-        pop_char = r_stack.pop(len(automata_stack)-1)
-
-        next_states = []
-
-        for state in states:
-            new_state = automata.get_next_pda_states(state, test_char, pop_char)
-            next_states.append(new_state)
-        i = 0
-        j = 0
-        for ns in next_states:
-            for ns2 in ns:
-                new_stack = []
-                for stk in r_stack:
-                    new_stack.append(stk)
-                for d in ns2[1]:
-                    new_stack.append(d)
-                next_states[i][j].append(new_stack)
-                j += 1
-            i += 1
-        return next_states
-
-    def pda_extended_transition_function(self, states, test_string, automata_stack, automata):
-        test_char = test_string[len(test_string)-1]
-        new_test_string = test_string[0:len(test_string) - 1]
-
-        test_states = []
+        print(test_char)
+        print(new_test_string)
 
         if len(test_string) == 1:
-            ts = self.pda_transition_function(states[0], test_char, automata_stack, automata)
-        else:
-            r_states = self.pda_extended_transition_function(states, new_test_string, automata_stack, automata)
-            return self.pda_transition_function(r_states[0], test_char, automata_stack, automata)
+            for state in states:
+                r_stack = []
+                stack_array = []
+                for au in automata_stack:
+                    r_stack.append(au)
 
-        return test_states
+                pop_char = r_stack.pop(len(automata_stack)-1)
+
+                next_states = automata.get_next_pda_states(state, test_string, pop_char)
+
+                for ns in next_states:
+                    r_stack_2 = []
+                    for au in r_stack:
+                        r_stack_2.append(au)
+
+                    for y in ns[1]:
+                        if y != "e":
+                            r_stack_2.append(y)
+                    stack_array.append(r_stack_2)
+
+                for sa in stack_array:
+                    print(sa)
+                    if len(sa) == 1 and sa[len(sa)-1] == "z":
+                        return True
+                return False
+        else:
+            for state in states:
+                r_stack = []
+                for au in automata_stack:
+                    r_stack.append(au)
+                pop_char = r_stack.pop(len(automata_stack)-1)
+
+                next_states = automata.get_next_pda_states(state, test_char, pop_char)
+
+                for ns in next_states:
+                    r_stack_2 = []
+                    for au in r_stack:
+                        r_stack_2.append(au)
+
+                    for y in ns[1]:
+                        if y != "e":
+                            r_stack_2.append(y)
+
+                    lol = [ns[0]]
+                    print(r_stack_2)
+                    return self.pda_transition_function(lol, new_test_string, r_stack_2, automata)
 
     def pda_to_glc(self, automata):
 
