@@ -224,12 +224,7 @@ class EvaluateAutomata:
 
         r_states = self.pda_extended_transition_function(init_states, test_string, automata_stack, automata)
 
-        for rs in r_states:
-            for rs2 in rs:
-                if rs2.accepted and automata_stack[len(automata_stack)-1] == "z":
-                    return True
-
-        return False
+        return r_states
 
     def pda_transition_function(self, states, test_char, automata_stack, automata):
 
@@ -267,14 +262,8 @@ class EvaluateAutomata:
 
         if len(test_string) == 1:
             ts = self.pda_transition_function(states[0], test_char, automata_stack, automata)
-
-            for ts2 in ts:
-                for ts3 in ts2:
-                    print(ts3[0].stateName)
-
         else:
             r_states = self.pda_extended_transition_function(states, new_test_string, automata_stack, automata)
-
             return self.pda_transition_function(r_states[0], test_char, automata_stack, automata)
 
         return test_states
@@ -289,14 +278,14 @@ class EvaluateAutomata:
         #Paso 1
         for fs in final_states:
             if len(glc_string_builder) == 0:
-                glc_string_builder += "S -> [" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+                glc_string_builder += "S > [" + initial_state.stateName + " z " + fs.stateName + "]" + "\n"
             else:
-                glc_string_builder += "   |[" + initial_state.stateName + " Z " + fs.stateName + "]" + "\n"
+                glc_string_builder += "S > [" + initial_state.stateName + " z " + fs.stateName + "]" + "\n"
         #paso 2
         for transition in automata.transitionList:
             if transition.push_char == "e":
                 glc_string_builder += "[ " + transition.originState.stateName + " " + transition.pop_char + " " +\
-                                      transition.destinationState.stateName + "] -> " + transition.transition_char + "\n"
+                                      transition.destinationState.stateName + "] > " + transition.transition_char + "\n"
         #Paso 3 tan tan taaaaaan...
         for transition in automata.transitionList:
             if transition.push_char != "e":
@@ -308,13 +297,13 @@ class EvaluateAutomata:
                 if len(push_string_array) == 1:
                     for st in super_tabla:
                         glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
-                                              st[len(st)-1] + "] -> " + transition.transition_char + "[" + \
-                                              st[0] + " " + push_string_array[0] + \
+                                              st[len(st)-1] + "] > " + transition.transition_char + "[" + \
+                                              transition.originState.stateName + " " + push_string_array[0] + \
                                               " " + st[0] + "]\n"
                 else:
                     for st in super_tabla:
                         glc_string_builder += "[" + transition.originState.stateName + " " + transition.pop_char + " " + \
-                                              st[len(st) - 1] + "] -> " + transition.transition_char + "[" + \
+                                              st[len(st) - 1] + "] > " + transition.transition_char + "[" + \
                                               transition.originState.stateName + " " + push_string_array[0] + " " + \
                                               st[0] + "]" + self.satanic_function(st, push_string_array[1:])
 
@@ -352,7 +341,7 @@ class EvaluateAutomata:
 
         for p in productions:
             if p:
-                prod = p.split("-")
+                prod = p.split(">")
                 transition_list.append(PdaTransition(init_state, init_state, "e", prod[0], prod[1]))
 
         for t in terminals:

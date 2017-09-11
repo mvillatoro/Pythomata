@@ -167,10 +167,10 @@ class AutomataActions:
 
     def get_terminals(self, glc_data):
         terminals = []
-        lowers = [l for l in glc_data if l.islower()]
+        lowers = [l for l in glc_data if not l.isupper()]
 
         for l in lowers:
-            if l not in terminals:
+            if l not in terminals and l != "\n" and l != ">":
                 terminals.append(l)
 
         return terminals

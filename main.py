@@ -260,7 +260,7 @@ class GUI(Frame):
         clean_glc_data = ""
 
         for gd in glc_data:
-            if gd == " " or gd == ">" or gd == "[" or gd == "]":
+            if gd == " " or gd == "[" or gd == "]":
                 pass
             else:
                 clean_glc_data += gd
@@ -268,6 +268,7 @@ class GUI(Frame):
         print(clean_glc_data)
 
         result = EvaluateAutomata().glc_to_pda(clean_glc_data)
+        print(result)
         self.clear_canvas(True)
         GUI.state_position.append([150, 300])
         GUI.state_position.append([400, 300])
