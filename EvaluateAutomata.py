@@ -346,15 +346,14 @@ class EvaluateAutomata:
         productions = glc_data.split("\n")
         terminals = AutomataActions().get_terminals(glc_data)
 
-        print(terminals)
-
         init_state = State("A", True, True)
         state_list = [init_state]
         transition_list = []
 
         for p in productions:
-            prod = p.split("-")
-            transition_list.append(PdaTransition(init_state, init_state, "e", prod[0], prod[1]))
+            if p:
+                prod = p.split("-")
+                transition_list.append(PdaTransition(init_state, init_state, "e", prod[0], prod[1]))
 
         for t in terminals:
             transition_list.append(PdaTransition(init_state, init_state, t, t, "e"))

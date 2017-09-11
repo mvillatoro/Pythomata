@@ -135,6 +135,7 @@ class GUI(Frame):
 
     automata_type = "Pda"
     shown_transitions = ""
+    glc_string_data = ""
     state_position = []
     record_state_position = False
 
@@ -217,8 +218,8 @@ class GUI(Frame):
     def pda_to_glc(self):
         result = EvaluateAutomata().pda_to_glc(self.au)
         if result:
-            GUI.shown_transitions = result
-            self.show_new_area(True)
+            GUI.glc_string_data = result
+            self.show_new_area(False)
 
     def automata_operations(self, operation):
         result = EvaluateAutomata().automata_operations(self.au, operation)
@@ -239,19 +240,34 @@ class GUI(Frame):
         text_area = Text(t, bg="#cccccc", height=29, width=90)
         text_area.place(x=10, y=10)
 
+        text_area.insert(END, GUI.glc_string_data)
+
         if not data:
             save_text_button = Button(t, text="Create PDA", command=lambda: self.glc_to_pda(text_area.get("1.0", END)))
             save_text_button.place(x=645, y=480)
             load_glc_button = Button(t, text="Load GLC", command=self.load_glc)
             load_glc_button.place(x=545, y=480)
         else:
+            text_area = Text(t, bg="#cccccc", height=29, width=90)
+            text_area.place(x=10, y=10)
             text_area.insert(END, GUI.au.get_pda_transitions())
 
         save_glc_button = Button(t, text="Save GLC", command=lambda: self.save_glc(text_area.get("1.0", END)))
         save_glc_button.place(x=450, y=480)
 
     def glc_to_pda(self, glc_data):
-        result = EvaluateAutomata().glc_to_pda(glc_data)
+
+        clean_glc_data = ""
+
+        for gd in glc_data:
+            if gd == " " or gd == ">" or gd == "[" or gd == "]":
+                pass
+            else:
+                clean_glc_data += gd
+
+        print(clean_glc_data)
+
+        result = EvaluateAutomata().glc_to_pda(clean_glc_data)
         self.clear_canvas(True)
         GUI.state_position.append([150, 300])
         GUI.state_position.append([400, 300])
