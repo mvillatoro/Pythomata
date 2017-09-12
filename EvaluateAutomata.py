@@ -224,14 +224,11 @@ class EvaluateAutomata:
 
         result = self.pda_transition_function(init_states, test_string, automata_stack, automata)
 
-        return result
+        return False
 
     def pda_transition_function(self, states, test_string, automata_stack, automata):
         test_char = test_string[0]
         new_test_string = test_string[1:]
-
-        print(test_char)
-        print(new_test_string)
 
         if len(test_string) == 1:
             for state in states:
@@ -239,11 +236,8 @@ class EvaluateAutomata:
                 stack_array = []
                 for au in automata_stack:
                     r_stack.append(au)
-
                 pop_char = r_stack.pop(len(automata_stack)-1)
-
                 next_states = automata.get_next_pda_states(state, test_string, pop_char)
-
                 for ns in next_states:
                     r_stack_2 = []
                     for au in r_stack:
@@ -253,9 +247,7 @@ class EvaluateAutomata:
                         if y != "e":
                             r_stack_2.append(y)
                     stack_array.append(r_stack_2)
-
                 for sa in stack_array:
-                    print(sa)
                     if len(sa) == 1 and sa[len(sa)-1] == "z":
                         return True
                 return False
@@ -278,7 +270,6 @@ class EvaluateAutomata:
                             r_stack_2.append(y)
 
                     lol = [ns[0]]
-                    print(r_stack_2)
                     return self.pda_transition_function(lol, new_test_string, r_stack_2, automata)
 
     def pda_to_glc(self, automata):
@@ -352,6 +343,8 @@ class EvaluateAutomata:
         state_list = [init_state]
         transition_list = []
 
+        transition_list.append(PdaTransition(init_state, init_state, "e", "e", "z"))
+
         for p in productions:
             if p:
                 prod = p.split(">")
@@ -359,7 +352,7 @@ class EvaluateAutomata:
 
         for t in terminals:
             transition_list.append(PdaTransition(init_state, init_state, t, t, "e"))
-
-        # origin__state, destination_state, transition_char, pop_char, push_char
-
         return AutomataActions().transformation_save_automata(state_list, transition_list, "PDA")
+
+    def evaluate_turing(self, test_string, automata):
+        return True

@@ -1,7 +1,7 @@
 from State import State
 from Transition import Transition
 from PdaTransition import PdaTransition
-
+from TuringTransition import TuringTransition
 
 class Automata:
     def __init__(self, automata_type):
@@ -48,31 +48,6 @@ class Automata:
                     new_transition = Transition(origin_state, destination_state, transition_char)
                     self.transitionList.append(new_transition)
                     return True
-
-    def create_pda_transition(self, origin, destination, transition_char, pop_char, push_char):
-        origin_state = self.get_state(origin)
-        destination_state = self.get_state(destination)
-
-        if self.pda_transition_exists(origin, destination, transition_char, pop_char, push_char):
-            print("Transition exists.")
-            return False
-        else:
-            new_pda_transition = PdaTransition(origin_state, destination_state, transition_char, pop_char, push_char)
-            self.transitionList.append(new_pda_transition)
-            return True
-
-    def pda_transition_exists(self, origin, destination, transition_char, pop, push):
-        if not self.state_exists(origin) and self.state_exists(destination):
-            return False
-
-        for transition in self.transitionList:
-            if transition.originState.stateName == origin and\
-                            transition.destinationState.stateName == destination and\
-                            transition.transition_char == transition_char and\
-                            transition.pop_char == pop and\
-                            transition.push_char == push:
-                return True
-        return False
 
     def check_dfa_transition(self, state, transition_char):
         for transition in self.transitionList:
@@ -450,3 +425,52 @@ class Automata:
             string_builder += transition.push_char + ")\n"
 
         return string_builder
+
+    def pda_transition_exists(self, origin, destination, transition_char, pop, push):
+        if not self.state_exists(origin) and self.state_exists(destination):
+            return False
+
+        for transition in self.transitionList:
+            if transition.originState.stateName == origin and\
+                            transition.destinationState.stateName == destination and\
+                            transition.transition_char == transition_char and\
+                            transition.pop_char == pop and\
+                            transition.push_char == push:
+                return True
+        return False
+
+    def create_pda_transition(self, origin, destination, transition_char, pop_char, push_char):
+        origin_state = self.get_state(origin)
+        destination_state = self.get_state(destination)
+
+        if self.pda_transition_exists(origin, destination, transition_char, pop_char, push_char):
+            print("Transition exists.")
+            return False
+        else:
+            new_pda_transition = PdaTransition(origin_state, destination_state, transition_char, pop_char, push_char)
+            self.transitionList.append(new_pda_transition)
+            return True
+
+    def create_turing_transition(self, origin, destination, transition_char, push_char, mov_dir):
+        origin_state = self.get_state(origin)
+        destination_state = self.get_state(destination)
+
+        if self.turing_transition_exists(origin, destination, transition_char, push_char, mov_dir):
+            print("Transition exists.")
+            return False
+        else:
+            new_turing_transition = TuringTransition(origin_state, destination_state, transition_char, push_char, mov_dir)
+            self.transitionList.append(new_turing_transition)
+            return True
+
+    def turing_transition_exists(self, origin, destination, transition_char, push_char, mov_dir):
+        if not self.state_exists(origin) and self.state_exists(destination):
+            return False
+
+        for transition in self.transitionList:
+            if transition.originState.stateName == origin and\
+                            transition.destinationState.stateName == destination and\
+                            transition.transition_char == transition_char and\
+                            transition.push_char == push_char and transition.mov_dir == mov_dir:
+                return True
+        return False

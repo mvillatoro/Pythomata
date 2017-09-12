@@ -133,7 +133,7 @@ class GUI(Frame):
     automataType = None
     nfa_to_dfa_button = None
 
-    automata_type = "Pda"
+    automata_type = "Turing"
     shown_transitions = ""
     glc_string_data = ""
     state_position = []
@@ -150,7 +150,7 @@ class GUI(Frame):
         GUI.state_nodes.append(node_data(x, y, label_text, fill_color, text_id, oval_id))
 
     def init_ui(self):
-        self.master.title("Pythomatas: Pfa")
+        self.master.title("Pythomatas: Turing")
         self.pack(fill=BOTH, expand=1)
         self.center_window()
 
@@ -263,15 +263,34 @@ class GUI(Frame):
             else:
                 clean_glc_data += gd
 
-        print(clean_glc_data)
-
+        r1 = self.fix_pda_input(clean_glc_data)
         result = EvaluateAutomata().glc_to_pda(clean_glc_data)
-        print(result)
+
         self.clear_canvas(True)
         GUI.state_position.append([150, 300])
         GUI.state_position.append([400, 300])
         GUI.state_position.append([650, 300])
         self.generate_text_automata(result)
+
+    def fix_pda_input(self, glc_data):
+
+        first_split = glc_data.split("\n")
+        pop_dictionary = []
+
+        i = 0
+        for fs in first_split:
+            pop_split = fs.split(">")
+            for pd in pop_dictionary:
+                for p in pd:
+                    if any(p):
+                        d = chr(i)
+                        pop_dictionary.append([pop_split, d])
+                        i += 1
+
+        for l in pop_dictionary:
+            print(l[0] + ", " + l[1])
+
+        return glc_data
 
     def load_glc(self):
         glc_text = askopenfilename()
@@ -368,6 +387,8 @@ class GUI(Frame):
 
         if GUI.automata_type == "Pda":
             transition_data = askstring('Insert Transition', "a,b,char,pop,push")
+        elif GUI.automata_type == "Turing":
+            transition_data = askstring('Insert Transition', "a,b,char,tape,move")
         else:
             transition_data = askstring('Insert Transition', "a,0,b")
 
@@ -381,7 +402,13 @@ class GUI(Frame):
                     messagebox.showinfo("Info", "La transision no se creo")
             else:
                 if self.au.create_pda_transition(ntd[0], ntd[1], ntd[2], ntd[3], ntd[4]):
-                    self.draw_line(ntd[0], ntd[1], ntd[2] + "," + ntd[3] + "/" + ntd[4])
+
+                    arrow = "→"
+
+                    if ntd[4] == "r":
+                        arrow = "←"
+
+                    self.draw_line(ntd[0], ntd[1], ntd[2] + "," + ntd[3] + "/" + arrow)
                 else:
                     messagebox.showinfo("Info", "La transision no se creo")
 
@@ -396,7 +423,7 @@ class GUI(Frame):
         tlx = (int(x1) + int(x2)) / 2
         tly = (int(y1) + int(y2)) / 2
 
-        text_id = GUI.drawing_area.create_text(tlx, tly, text=transition_char, font=("Purisa", 12))
+        text_id = GUI.drawing_area.create_text(tlx, tly-15, text=transition_char, font=("Purisa", 12))
 
         if int(x1) < int(x2):
             if int(y1) < int(y2):
@@ -436,6 +463,8 @@ class GUI(Frame):
         if test_string:
             if GUI.automata_type == "Pda":
                 result = EvaluateAutomata().evaluate_pda(test_string, self.au)
+            elif GUI.automata_type == "Turing":
+                result = EvaluateAutomata().evaluate_turing(test_string, self.au)
             else:
                 result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 
@@ -540,6 +569,7 @@ class GUI(Frame):
         self.au.list_transitions()
         self.au.list_states()
 
+
 def main():
     root = Tk()
     app = GUI()
@@ -548,7 +578,6 @@ def main():
     root.bind("<Button-3>", GUI.test_event_state)
 
     root.mainloop()
-
 
 if __name__ == '__main__':
     main()
