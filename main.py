@@ -345,6 +345,9 @@ class GUI(Frame):
             if GUI.automata_type == "Pda":
                 if self.au.save_pda_automata(file_name, "y"):
                     messagebox.showinfo("Result", "El automata se salvo")
+            elif GUI.automata_type == "Turing":
+                if self.au.save_turing_automata(file_name, "y"):
+                    messagebox.showinfo("Result", "El automata se salvo")
             else:
                 if self.au.save_automata(file_name, "y"):
                     messagebox.showinfo("Result", "El automata se salvo")
@@ -401,14 +404,14 @@ class GUI(Frame):
                 else:
                     messagebox.showinfo("Info", "La transision no se creo")
             else:
-                if self.au.create_pda_transition(ntd[0], ntd[1], ntd[2], ntd[3], ntd[4]):
+                if self.au.create_turing_transition(ntd[0], ntd[1], ntd[2], ntd[3], ntd[4]):
 
-                    arrow = "→"
+                    arrow = "←"
 
-                    if ntd[4] == "r":
-                        arrow = "←"
+                    if ntd[4] == "r" or ntd[4] == "R":
+                        arrow = "→"
 
-                    self.draw_line(ntd[0], ntd[1], ntd[2] + "," + ntd[3] + "/" + arrow)
+                    self.draw_line(ntd[0], ntd[1], ntd[2] + "/" + ntd[3] + arrow)
                 else:
                     messagebox.showinfo("Info", "La transision no se creo")
 
@@ -469,7 +472,10 @@ class GUI(Frame):
                 result = EvaluateAutomata().evaluate_nfa_e(test_string, self.au)
 
             if result:
-                messagebox.showinfo("Result", "La cadena fue aceptada")
+                if GUI.automata_type == "Pda":
+                    messagebox.showinfo("Result", "La cadena fue aceptada")
+                elif GUI.automata_type == "Turing":
+                    messagebox.showinfo("Result", "Resultado de la cinta" + "\n" + result)
             else:
                 messagebox.showinfo("Result", "La cadena no fue aceptada")
 
@@ -509,6 +515,11 @@ class GUI(Frame):
                     GUI.drawing_area.delete(c_id)
                     GUI.drawing_area.delete(e_id)
                     del GUI.state_nodes[i]
+                elif GUI.automata_type == "Turing":
+                    GUI.au.delete_turing_transition(state_name, element1, element2)
+                    GUI.drawing_area.delete(c_id)
+                    GUI.drawing_area.delete(e_id)
+                    del GUI.state_nodes[i]
                 else:
                     GUI.au.delete_transition(state_name, element1, element2)
                     GUI.drawing_area.delete(c_id)
@@ -542,6 +553,15 @@ class GUI(Frame):
             if GUI.automata_type == "Pda":
                 self.au.create_pda_transition(ntd[0], ntd[4], ntd[1], ntd[2], ntd[3])
                 self.draw_line(ntd[0], ntd[4], ntd[1] + "," + ntd[2] + "/" + ntd[3])
+            elif GUI.automata_type == "Turing":
+                self.au.create_turing_transition(ntd[0], ntd[4], ntd[1], ntd[2], ntd[3])
+
+                arrow = "←"
+
+                if ntd[3] == "r" or ntd[3] == "R":
+                    arrow = "→"
+
+                self.draw_line(ntd[0], ntd[4], ntd[1] + "/" + ntd[2] + arrow)
             else:
                 self.au.create_transition(ntd[0], ntd[2], ntd[1])
                 self.draw_line(ntd[0], ntd[2], ntd[1])
@@ -553,7 +573,8 @@ class GUI(Frame):
             GUI.state_position.append([GUI.global_x, GUI.global_y])
 
     def test_event_state(event):
-        messagebox.showinfo("Result", "La cadena fue aceptada")
+        # messagebox.showinfo("Result", "La cadena fue aceptada")
+        pass
 
     def clear_canvas(self, full_clear):
 

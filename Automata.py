@@ -474,3 +474,52 @@ class Automata:
                             transition.push_char == push_char and transition.mov_dir == mov_dir:
                 return True
         return False
+
+    def delete_turing_transition(self,data,tata, dada):
+        return True
+
+    def save_turing_automata(self, save_name, op):
+        state_string = ""
+
+        if len(self.stateList) == 0:
+            return False
+
+        for state in self.stateList:
+            string_builder = state.stateName + ","
+            if state.isInitial and state.accepted:
+                string_builder = string_builder + "IF"
+            elif state.isInitial and not state.accepted:
+                string_builder = string_builder + "I"
+            if not state.isInitial and not state.accepted:
+                string_builder = string_builder + "N"
+            if not state.isInitial and state.accepted:
+                string_builder = string_builder + "F"
+            string_builder = string_builder + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+        state_string = state_string + "*"
+
+        for transition in self.transitionList:
+            string_builder = transition.originState.stateName + "," +\
+                             transition.transition_char + "," +\
+                             transition.push_char + "," + \
+                             transition.mov_dir + "," +\
+                             transition.destinationState.stateName + "|"
+
+            state_string = state_string + string_builder
+
+        state_string = state_string[:-1]
+
+        if op == "y":
+            f = open("C:\\Users\\mvill\\Desktop\\" + save_name + ".ptm", "w+")
+            f.write(state_string)
+            return True
+        else:
+            return state_string
+
+    def get_next_turing_state(self, state, transition_char):
+        for transition in self.transitionList:
+            if state.stateName == transition.originState.stateName and transition.transition_char == transition_char:
+                return transition

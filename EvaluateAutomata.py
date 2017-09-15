@@ -354,5 +354,38 @@ class EvaluateAutomata:
             transition_list.append(PdaTransition(init_state, init_state, t, t, "e"))
         return AutomataActions().transformation_save_automata(state_list, transition_list, "PDA")
 
-    def evaluate_turing(self, test_string, automata):
-        return True
+    def evaluate_turing(self, test_tape, automata):
+
+        break_loop = 0
+        string_list = list(test_tape)
+        string_list.append("B")
+        string_list.insert(0, "B")
+        print(string_list)
+
+        current_state = automata.get_initial_node()
+        run_machine = True
+        i = 1
+        while run_machine:
+            print(i)
+            current_data = automata.get_next_turing_state(current_state, string_list[i])
+
+            if current_data is not None:
+                print(current_state.stateName)
+                current_state = current_data.destinationState
+
+                string_list[i] = current_data.push_char
+
+                if current_data.mov_dir == "r" or current_data.mov_dir == "R":
+                    i += 1
+                else:
+                    i -= 1
+
+            break_loop += 1
+
+            if break_loop == 500:
+                return "Loops infinitely" + "\n" + "".join(string_list)
+
+            if string_list[i] == "B":
+                run_machine = False
+
+        return "".join(string_list)
