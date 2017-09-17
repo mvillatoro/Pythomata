@@ -360,17 +360,14 @@ class EvaluateAutomata:
         string_list = list(test_tape)
         string_list.append("B")
         string_list.insert(0, "B")
-        print(string_list)
 
         current_state = automata.get_initial_node()
         run_machine = True
         i = 1
         while run_machine:
-            print(i)
             current_data = automata.get_next_turing_state(current_state, string_list[i])
 
             if current_data is not None:
-                print(current_state.stateName)
                 current_state = current_data.destinationState
 
                 string_list[i] = current_data.push_char
@@ -385,7 +382,10 @@ class EvaluateAutomata:
             if break_loop == 500:
                 return "Loops infinitely" + "\n" + "".join(string_list)
 
-            if string_list[i] == "B":
+            if current_state.accepted:
                 run_machine = False
 
-        return "".join(string_list)
+        if current_state.accepted:
+            return "".join(string_list)
+        else:
+            return "No acepta"
