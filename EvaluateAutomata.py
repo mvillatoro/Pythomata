@@ -376,7 +376,8 @@ class EvaluateAutomata:
                     i += 1
                 else:
                     i -= 1
-
+            else:
+                return "No acepta"
             break_loop += 1
 
             if break_loop == 500:
